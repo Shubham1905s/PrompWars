@@ -1,12 +1,58 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, StadiumEvent, Seat, Booking, FoodOrder } from './types';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  vehicle: string | null;
+}
+
+export interface StadiumEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  teams: [string, string];
+  category: string;
+}
+
+export interface Seat {
+  id: string;
+  section: string;
+  price: number;
+  isBooked: boolean;
+  lockedUntil?: number;
+  lockedBy?: string;
+  gate: number;
+  parking: string;
+}
+
+export interface VenueBooking {
+  id: string;
+  userId: string;
+  eventId: string;
+  seatId: string;
+  gate: number;
+  parking: string;
+  status: 'PENDING' | 'CONFIRMED';
+  timestamp: number;
+}
+
+export interface FoodOrder {
+  id: string;
+  userId: string;
+  seatId: string;
+  items: { itemId: string; quantity: number }[];
+  status: 'PLACED' | 'PREPARING' | 'DELIVERED';
+}
 
 interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
   events: StadiumEvent[];
   seats: Seat[];
-  bookings: Booking[];
+  bookings: VenueBooking[];
   orders: FoodOrder[];
   bookSeat: (eventId: string, seatId: string) => Promise<boolean>;
   lockSeat: (seatId: string) => boolean;
@@ -19,7 +65,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [seats, setSeats] = useState<Seat[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<VenueBooking[]>([]);
   const [orders, setOrders] = useState<FoodOrder[]>([]);
 
   const events: StadiumEvent[] = [
@@ -28,7 +74,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ];
 
   useEffect(() => {
-    // Initialize seats
     const initialSeats: Seat[] = [];
     const sections = ['A', 'B', 'C', 'D', 'E', 'F'];
     sections.forEach((sec, idx) => {
@@ -62,7 +107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const seat = seats.find(s => s.id === seatId);
     if (!seat) return false;
 
-    const newBooking: Booking = {
+    const newBooking: VenueBooking = {
       id: Math.random().toString(36).substr(2, 9),
       userId: currentUser.id,
       eventId,
