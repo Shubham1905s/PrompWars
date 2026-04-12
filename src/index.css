@@ -202,3 +202,29 @@ body {
 .border-l-4 {
   border-left-width: 4px;
 }
+
+.gate-marker {
+  position: absolute;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.gate-marker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
+  opacity: 0.3;
+}

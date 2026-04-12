@@ -81,18 +81,25 @@ const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string
       {events.map(event => (
         <motion.div 
           key={event.id}
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, y: -5 }}
           onClick={() => onSelectEvent(event.id)}
-          className="glass p-6 cursor-pointer glow-hover"
+          className="glass cursor-pointer glow-hover"
+          style={{ padding: 0, overflow: 'hidden' }}
         >
-          <div className="flex justify-between items-start">
-            <span className="badge badge-blue mb-2">{event.category}</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{event.date}</span>
+          <div style={{ height: '160px', overflow: 'hidden', position: 'relative' }}>
+             <img src={event.image} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--bg-dark), transparent)' }} />
+             <span className="badge badge-blue" style={{ position: 'absolute', top: 12, left: 12 }}>{event.category}</span>
           </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{event.title}</h3>
-          <p style={{ color: 'var(--accent-primary)', fontWeight: 600, marginTop: '0.5rem' }}>
-            {event.teams[0]} vs {event.teams[1]}
-          </p>
+          <div style={{ padding: '1.5rem' }}>
+            <div className="flex justify-between items-center">
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{event.title}</h3>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{event.date}</span>
+            </div>
+            <p style={{ color: 'var(--accent-primary)', fontWeight: 600, marginTop: '0.5rem' }}>
+              {event.teams[0]} vs {event.teams[1]}
+            </p>
+          </div>
         </motion.div>
       ))}
     </div>
@@ -233,6 +240,66 @@ const TicketScreen = ({ bookingId, onEnter }: { bookingId: string, onEnter: () =
   );
 };
 
+// --- STADIUM MAP COMPONENT ---
+const StadiumMap = () => (
+  <div className="glass map-container" style={{ height: '350px', background: '#020617', position: 'relative', overflow: 'hidden' }}>
+     {/* STADIUM STRUCTURE */}
+     <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        {/* Outer Perimeter */}
+        <rect x="30" y="30" width="240" height="240" rx="60" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        {/* Stands (Inner Ring) */}
+        <rect x="70" y="70" width="160" height="160" rx="30" fill="none" stroke="rgba(59, 130, 246, 0.2)" strokeWidth="20" />
+        {/* Field */}
+        <rect x="110" y="110" width="80" height="80" rx="5" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" strokeWidth="1" />
+        <line x1="110" y1="150" x2="190" y2="150" stroke="#10b981" strokeWidth="0.5" />
+        <circle cx="150" cy="150" r="15" fill="none" stroke="#10b981" strokeWidth="0.5" />
+        
+        {/* Stand Labels */}
+        <text x="150" y="60" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold">NORTH STAND</text>
+        <text x="150" y="250" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold">SOUTH STAND</text>
+        <text x="50" y="150" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold" transform="rotate(-90, 50, 150)">WEST STAND</text>
+        <text x="250" y="150" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold" transform="rotate(90, 250, 150)">EAST STAND</text>
+     </svg>
+     
+     {/* GATES */}
+     <div className="gate-marker" style={{ top: '10%', left: '50%', transform: 'translateX(-50%)' }}>G1</div>
+     <div className="gate-marker" style={{ bottom: '10%', left: '50%', transform: 'translateX(-50%)' }}>G3</div>
+     <div className="gate-marker" style={{ top: '50%', left: '10%', transform: 'translateY(-50%)' }}>G4</div>
+     <div className="gate-marker" style={{ top: '50%', right: '10%', transform: 'translateY(-50%)' }}>G2</div>
+
+     {/* HEATMAP BLOBS */}
+     <div className="heatmap-blob" style={{ top: '25%', left: '35%', width: '60px', height: '60px', background: 'rgba(239, 68, 68, 0.4)' }} />
+     <div className="heatmap-blob" style={{ top: '65%', left: '60%', width: '90px', height: '90px', background: 'rgba(245, 158, 11, 0.3)' }} />
+     
+     {/* NAVIGATION PATH */}
+     <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        <motion.path 
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          d="M 150 40 L 150 100 L 220 150" 
+          stroke="var(--accent-primary)" 
+          fill="none" 
+          strokeWidth="3" 
+          strokeDasharray="8,8" 
+        />
+     </svg>
+     
+     {/* MARKERS */}
+     <div style={{ position: 'absolute', top: '10%', left: '46%', color: 'var(--accent-primary)' }} className="pulse">
+       <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem', border: '1px solid var(--accent-primary)' }}>
+          <Smartphone size={10} /> <span>YOU</span>
+       </div>
+     </div>
+     
+     <div style={{ position: 'absolute', top: '50%', left: '70%', color: 'var(--accent-tertiary)' }}>
+       <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem', border: '1px solid var(--accent-tertiary)' }}>
+          <MapPin size={10} /> <span>SEAT</span>
+       </div>
+     </div>
+  </div>
+);
+
 // --- SCREEN 6: IN-VENUE EXPERIENCE ---
 const VenueDashboard = () => {
   const [activeTab, setActiveTab] = useState<'map' | 'food' | 'status'>('map');
@@ -249,44 +316,7 @@ const VenueDashboard = () => {
       <AnimatePresence mode="wait">
         {activeTab === 'map' && (
           <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-            <div className="glass map-container" style={{ height: '350px', background: '#020617', position: 'relative', overflow: 'hidden' }}>
-               {/* STADIUM OUTLINE */}
-               <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.3 }}>
-                  <rect x="50" y="50" width="200" height="200" rx="40" fill="none" stroke="white" strokeWidth="1" />
-                  <rect x="100" y="100" width="100" height="100" rx="10" fill="none" stroke="white" strokeWidth="0.5" />
-               </svg>
-               
-               {/* HEATMAP BLOBS */}
-               <div className="heatmap-blob" style={{ top: '20%', left: '30%', width: '80px', height: '80px', background: 'rgba(239, 68, 68, 0.4)' }} />
-               <div className="heatmap-blob" style={{ top: '60%', left: '70%', width: '100px', height: '100px', background: 'rgba(245, 158, 11, 0.3)' }} />
-               
-               {/* NAVIGATION PATH */}
-               <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                  <motion.path 
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    d="M 60 60 L 150 150 L 250 250" 
-                    stroke="var(--accent-primary)" 
-                    fill="none" 
-                    strokeWidth="3" 
-                    strokeDasharray="8,8" 
-                  />
-               </svg>
-               
-               {/* MARKERS */}
-               <div style={{ position: 'absolute', top: '15%', left: '15%', color: 'var(--accent-primary)' }} className="pulse">
-                 <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem' }}>
-                    <Smartphone size={10} /> <span>YOU</span>
-                 </div>
-               </div>
-               
-               <div style={{ position: 'absolute', bottom: '10%', right: '10%', color: 'var(--accent-tertiary)' }}>
-                 <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem' }}>
-                    <MapPin size={10} /> <span>SEAT</span>
-                 </div>
-               </div>
-            </div>
+            <StadiumMap />
             
             <div className="flex gap-4">
               <div className="glass flex-1 flex items-center justify-between">

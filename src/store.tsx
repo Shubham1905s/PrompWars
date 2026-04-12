@@ -15,6 +15,7 @@ export interface StadiumEvent {
   time: string;
   teams: [string, string];
   category: string;
+  image: string;
 }
 
 export interface Seat {
@@ -98,8 +99,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ];
 
   const events: StadiumEvent[] = [
-    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football' },
-    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-05-22', time: '15:00', category: 'Tennis' },
+    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football', image: '/stadium1.png' },
+    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-05-22', time: '15:00', category: 'Tennis', image: '/stadium2.png' },
   ];
 
   useEffect(() => {
