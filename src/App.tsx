@@ -4,7 +4,8 @@ import {
   Users, MapPin, Zap, Bell, Search, 
   ChevronRight, CreditCard, Ticket as TicketIcon, 
   Navigation, Coffee, User as UserIcon, LogIn,
-  ArrowLeft, CheckCircle, Smartphone, Activity, AlertTriangle
+  ArrowLeft, CheckCircle, Smartphone, Activity, AlertTriangle,
+  Clock, Shield, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -109,8 +110,8 @@ const BookingScreen = ({ eventId, onConfirm }: { eventId: string, onConfirm: (bo
 
   const handleBook = async () => {
     if (!selectedSeat) return;
-    const success = await bookSeat(eventId, selectedSeat);
-    if (success) onConfirm(selectedSeat); // Using seatId for simplicity in mock
+    const bookingId = await bookSeat(eventId, selectedSeat);
+    if (bookingId) onConfirm(bookingId);
   };
 
   return (
@@ -150,27 +151,39 @@ const BookingScreen = ({ eventId, onConfirm }: { eventId: string, onConfirm: (bo
 };
 
 // --- SCREEN 4: PAYMENT ---
-const PaymentScreen = ({ onComplete }: { onComplete: () => void }) => (
-  <div className="flex flex-col gap-8 text-center pt-8">
-    <div className="stat-icon" style={{ margin: '0 auto' }}><CreditCard size={32} /></div>
-    <div>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Secure Checkout</h2>
-      <p style={{ color: 'var(--text-muted)' }}>Select your preferred payment method</p>
+const PaymentScreen = ({ bookingId, onComplete }: { bookingId: string, onComplete: () => void }) => {
+  const { confirmBooking } = useApp();
+  
+  const handlePayment = () => {
+    confirmBooking(bookingId);
+    onComplete();
+  };
+
+  return (
+    <div className="flex flex-col gap-8 text-center pt-8">
+      <div className="stat-icon" style={{ margin: '0 auto' }}><CreditCard size={32} /></div>
+      <div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Secure Checkout</h2>
+        <p style={{ color: 'var(--text-muted)' }}>Select your preferred payment method</p>
+      </div>
+      <div className="flex flex-col gap-4">
+        {['Apple Pay', 'Google Pay', 'Stripe / Credit Card'].map(m => (
+          <button key={m} onClick={handlePayment} className="glass py-4 font-bold flex justify-between px-6 hover:bg-slate-800 transition-colors">
+            {m} <ChevronRight size={18} />
+          </button>
+        ))}
+      </div>
     </div>
-    <div className="flex flex-col gap-4">
-      {['Apple Pay', 'Google Pay', 'Stripe / Credit Card'].map(m => (
-        <button key={m} onClick={onComplete} className="glass py-4 font-bold flex justify-between px-6 hover:bg-slate-800 transition-colors">
-          {m} <ChevronRight size={18} />
-        </button>
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
 // --- SCREEN 5: TICKET PASSPORT ---
-const TicketScreen = ({ seatId, onEnter }: { seatId: string, onEnter: () => void }) => {
-  const { seats, currentUser } = useApp();
-  const seat = seats.find(s => s.id === seatId);
+const TicketScreen = ({ bookingId, onEnter }: { bookingId: string, onEnter: () => void }) => {
+  const { bookings, seats, currentUser } = useApp();
+  const booking = bookings.find(b => b.id === bookingId);
+  const seat = seats.find(s => s.id === booking?.seatId);
+
+  if (!booking) return null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -187,7 +200,7 @@ const TicketScreen = ({ seatId, onEnter }: { seatId: string, onEnter: () => void
         </div>
         <div style={{ padding: '2rem' }}>
           <div className="grid grid-cols-2 gap-8">
-            <div><p className="badge badge-blue">SEAT</p><h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{seatId}</h3></div>
+            <div><p className="badge badge-blue">SEAT</p><h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{booking.seatId}</h3></div>
             <div><p className="badge badge-orange">GATE</p><h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{seat?.gate}</h3></div>
             <div><p className="badge badge-green">PARKING</p><h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{seat?.parking}</h3></div>
             <div><p className="badge">SEC</p><h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{seat?.section}</h3></div>
@@ -208,61 +221,150 @@ const TicketScreen = ({ seatId, onEnter }: { seatId: string, onEnter: () => void
 // --- SCREEN 6: IN-VENUE EXPERIENCE ---
 const VenueDashboard = () => {
   const [activeTab, setActiveTab] = useState<'map' | 'food' | 'status'>('map');
-  const { placeOrder } = useApp();
+  const { placeOrder, queueTimes, safetyLogs } = useApp();
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex justify-around glass p-2">
-         <button onClick={() => setActiveTab('map')} style={{ color: activeTab === 'map' ? 'var(--accent-primary)' : 'gray' }}><MapPin size={24} /></button>
-         <button onClick={() => setActiveTab('food')} style={{ color: activeTab === 'food' ? 'var(--accent-primary)' : 'gray' }}><Coffee size={24} /></button>
-         <button onClick={() => setActiveTab('status')} style={{ color: activeTab === 'status' ? 'var(--accent-primary)' : 'gray' }}><Activity size={24} /></button>
+      <nav className="flex justify-around glass p-1" style={{ borderRadius: '1rem' }}>
+         <button onClick={() => setActiveTab('map')} className={activeTab === 'map' ? 'tab-active' : 'tab-inactive'}><MapPin size={20} /></button>
+         <button onClick={() => setActiveTab('food')} className={activeTab === 'food' ? 'tab-active' : 'tab-inactive'}><Coffee size={20} /></button>
+         <button onClick={() => setActiveTab('status')} className={activeTab === 'status' ? 'tab-active' : 'tab-inactive'}><Activity size={20} /></button>
       </nav>
 
       <AnimatePresence mode="wait">
         {activeTab === 'map' && (
           <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-            <div className="glass" style={{ height: '300px', background: '#000', position: 'relative' }}>
-               <div style={{ position: 'absolute', top: '10%', left: '10%', color: 'var(--accent-primary)' }}><Smartphone size={16} /> <span style={{ fontSize: '0.7rem' }}>You</span></div>
-               <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                  <path d="M 40 40 L 200 150 L 280 250" stroke="var(--accent-primary)" fill="none" strokeWidth="2" strokeDasharray="5,5" />
+            <div className="glass map-container" style={{ height: '350px', background: '#020617', position: 'relative', overflow: 'hidden' }}>
+               {/* STADIUM OUTLINE */}
+               <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.3 }}>
+                  <rect x="50" y="50" width="200" height="200" rx="40" fill="none" stroke="white" strokeWidth="1" />
+                  <rect x="100" y="100" width="100" height="100" rx="10" fill="none" stroke="white" strokeWidth="0.5" />
                </svg>
-               <div style={{ position: 'absolute', bottom: '10%', right: '10%', color: 'var(--accent-tertiary)' }}><MapPin size={16} /> <span style={{ fontSize: '0.7rem' }}>Your Seat</span></div>
-            </div>
-            <div className="glass flex items-center justify-between">
-               <div>
-                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Arrival</p>
-                 <p style={{ fontWeight: 800 }}>4 Minutes</p>
+               
+               {/* HEATMAP BLOBS */}
+               <div className="heatmap-blob" style={{ top: '20%', left: '30%', width: '80px', height: '80px', background: 'rgba(239, 68, 68, 0.4)' }} />
+               <div className="heatmap-blob" style={{ top: '60%', left: '70%', width: '100px', height: '100px', background: 'rgba(245, 158, 11, 0.3)' }} />
+               
+               {/* NAVIGATION PATH */}
+               <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                  <motion.path 
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    d="M 60 60 L 150 150 L 250 250" 
+                    stroke="var(--accent-primary)" 
+                    fill="none" 
+                    strokeWidth="3" 
+                    strokeDasharray="8,8" 
+                  />
+               </svg>
+               
+               {/* MARKERS */}
+               <div style={{ position: 'absolute', top: '15%', left: '15%', color: 'var(--accent-primary)' }} className="pulse">
+                 <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem' }}>
+                    <Smartphone size={10} /> <span>YOU</span>
+                 </div>
                </div>
-               <Navigation size={24} color="var(--accent-primary)" />
+               
+               <div style={{ position: 'absolute', bottom: '10%', right: '10%', color: 'var(--accent-tertiary)' }}>
+                 <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem' }}>
+                    <MapPin size={10} /> <span>SEAT</span>
+                 </div>
+               </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="glass flex-1 flex items-center justify-between">
+                 <div>
+                   <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>ARRIVAL</p>
+                   <p style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>4 MIN</p>
+                 </div>
+                 <Navigation size={18} />
+              </div>
+              <div className="glass flex-1 flex items-center justify-between">
+                 <div>
+                   <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>CROWD</p>
+                   <p style={{ fontWeight: 800, color: '#f59e0b' }}>MODERATE</p>
+                 </div>
+                 <Users size={18} />
+              </div>
             </div>
           </motion.div>
         )}
 
         {activeTab === 'food' && (
           <motion.div key="food" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-             <h3 style={{ fontWeight: 800 }}>In-Seat Delivery</h3>
-             {['Classic Burger', 'Spicy Wings', 'Large Cola'].map(item => (
-               <div key={item} className="glass flex justify-between items-center">
-                 <span>{item}</span>
-                 <button onClick={() => placeOrder('A1', [{ itemId: item, quantity: 1 }])} className="badge badge-blue">ADD • $12</button>
-               </div>
+             <div className="flex justify-between items-center mb-2">
+               <h3 style={{ fontWeight: 800 }}>In-Seat Delivery</h3>
+               <span className="badge badge-green">LIVE</span>
+             </div>
+             {['Classic Burger', 'Spicy Wings', 'Large Cola', 'Popcorn XL'].map((item, idx) => (
+                <div key={item} className="glass flex justify-between items-center border-l-4" style={{ borderColor: idx === 0 ? 'var(--accent-primary)' : 'transparent' }}>
+                  <div className="flex items-center gap-4">
+                    <div style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.05)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Coffee size={20} color="var(--text-muted)" />
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 700 }}>{item}</p>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Prep time: 10m</p>
+                    </div>
+                  </div>
+                  <button onClick={() => placeOrder('A1', [{ itemId: item, quantity: 1 }])} className="primary py-2 px-4 text-xs">ADD • $12</button>
+                </div>
              ))}
           </motion.div>
         )}
 
         {activeTab === 'status' && (
-          <motion.div key="status" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+          <motion.div key="status" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
+             {/* ALERT */}
              <div className="glass bg-orange-500/10 border-orange-500/20">
-                <AlertTriangle size={20} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
-                <h4 style={{ fontWeight: 800 }}>Crowded Area: Gate 2</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Strongly suggest using Gate 3 or North Exit to avoid delays.</p>
-             </div>
-             <div className="glass">
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Event Status</p>
-                <div className="flex items-center gap-2 mt-1">
-                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                   <p style={{ fontWeight: 700 }}>2nd Quarter • 08:12</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle size={18} color="#f59e0b" />
+                  <h4 style={{ fontWeight: 800, fontSize: '0.9rem' }}>High Congestion: Gate 2</h4>
                 </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Gate 2 is experiencing heavy flow. We recommend using <strong>Gate 3</strong> for 40% faster entry.</p>
+             </div>
+
+             {/* QUEUE TIMES */}
+             <div className="flex flex-col gap-3">
+               <h4 className="flex items-center gap-2" style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                 <Clock size={14} /> LIVE QUEUE ESTIMATES
+               </h4>
+               <div className="grid grid-cols-2 gap-3">
+                 {queueTimes.map(q => (
+                   <div key={q.area} className="glass p-3 flex flex-col gap-1">
+                      <p style={{ fontSize: '0.65rem', fontWeight: 700 }}>{q.area}</p>
+                      <div className="flex justify-between items-end">
+                        <p style={{ fontSize: '1.25rem', fontWeight: 900 }}>{q.waitMinutes}m</p>
+                        <span style={{ fontSize: '0.5rem', color: q.status === 'CONGESTED' ? '#ef4444' : (q.status === 'BUSY' ? '#f59e0b' : '#10b981') }}>
+                          {q.status}
+                        </span>
+                      </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
+
+             {/* SAFETY TIMELINE */}
+             <div className="flex flex-col gap-3">
+               <h4 className="flex items-center gap-2" style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                 <Shield size={14} /> SAFETY & OPS TIMELINE
+               </h4>
+               <div className="flex flex-col gap-0">
+                 {safetyLogs.map((log, idx) => (
+                   <div key={log.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: idx === 0 ? 'var(--accent-primary)' : 'var(--text-muted)', marginTop: '4px' }} />
+                        {idx !== safetyLogs.length - 1 && <div style={{ width: 1, flexGrow: 1, background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />}
+                      </div>
+                      <div className="pb-4">
+                        <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>{log.time} • {log.officer}</p>
+                        <p style={{ fontSize: '0.8rem', fontWeight: 500 }}>{log.message}</p>
+                      </div>
+                   </div>
+                 ))}
+               </div>
              </div>
           </motion.div>
         )}
@@ -275,17 +377,17 @@ const VenueDashboard = () => {
 const AppInner = () => {
   const [step, setStep] = useState<'login' | 'discovery' | 'booking' | 'payment' | 'ticket' | 'venue'>('login');
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
-  const [activeSeatId, setActiveSeatId] = useState<string | null>(null);
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
 
   return (
     <div className="container" style={{ maxWidth: '500px', padding: '1rem' }}>
       <AnimatePresence mode="wait">
         <motion.div 
           key={step} 
-          initial={{ opacity: 0, x: 20 }} 
-          animate={{ opacity: 1, x: 0 }} 
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           {step === 'login' && <LoginScreen onLogin={() => setStep('discovery')} />}
           
@@ -294,12 +396,12 @@ const AppInner = () => {
           )}
 
           {step === 'booking' && activeEventId && (
-            <BookingScreen eventId={activeEventId} onConfirm={(seatId) => { setActiveSeatId(seatId); setStep('payment'); }} />
+            <BookingScreen eventId={activeEventId} onConfirm={(id) => { setActiveBookingId(id); setStep('payment'); }} />
           )}
 
-          {step === 'payment' && <PaymentScreen onComplete={() => setStep('ticket')} />}
+          {step === 'payment' && activeBookingId && <PaymentScreen bookingId={activeBookingId} onComplete={() => setStep('ticket')} />}
 
-          {step === 'ticket' && activeSeatId && <TicketScreen seatId={activeSeatId} onEnter={() => setStep('venue')} />}
+          {step === 'ticket' && activeBookingId && <TicketScreen bookingId={activeBookingId} onEnter={() => setStep('venue')} />}
 
           {step === 'venue' && <VenueDashboard />}
         </motion.div>

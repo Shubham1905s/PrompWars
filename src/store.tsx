@@ -47,6 +47,19 @@ export interface FoodOrder {
   status: 'PLACED' | 'PREPARING' | 'DELIVERED';
 }
 
+export interface QueueTime {
+  area: string;
+  waitMinutes: number;
+  status: 'FLUID' | 'BUSY' | 'CONGESTED';
+}
+
+export interface SafetyLog {
+  id: string;
+  time: string;
+  message: string;
+  officer: string;
+}
+
 interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
@@ -54,7 +67,9 @@ interface AppContextType {
   seats: Seat[];
   bookings: VenueBooking[];
   orders: FoodOrder[];
-  bookSeat: (eventId: string, seatId: string) => Promise<boolean>;
+  queueTimes: QueueTime[];
+  safetyLogs: SafetyLog[];
+  bookSeat: (eventId: string, seatId: string) => Promise<string | null>;
   lockSeat: (seatId: string) => boolean;
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
@@ -67,6 +82,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [seats, setSeats] = useState<Seat[]>([]);
   const [bookings, setBookings] = useState<VenueBooking[]>([]);
   const [orders, setOrders] = useState<FoodOrder[]>([]);
+  
+  const queueTimes: QueueTime[] = [
+    { area: 'Main Concourse', waitMinutes: 5, status: 'FLUID' },
+    { area: 'Gate 2 Entrance', waitMinutes: 18, status: 'CONGESTED' },
+    { area: 'South Food Court', waitMinutes: 12, status: 'BUSY' },
+    { area: 'East Restrooms', waitMinutes: 2, status: 'FLUID' },
+  ];
+
+  const safetyLogs: SafetyLog[] = [
+    { id: '1', time: '14:20', message: 'Perimeter check clear.', officer: 'Sgt. Barnes' },
+    { id: '2', time: '14:45', message: 'Gate 2 pressure valve opened.', officer: 'Officer Reed' },
+    { id: '3', time: '15:10', message: 'Section C medic deployment.', officer: 'Rescue 4' },
+  ];
 
   const events: StadiumEvent[] = [
     { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football' },
@@ -102,13 +130,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const bookSeat = async (eventId: string, seatId: string) => {
-    if (!currentUser) return false;
+    if (!currentUser) return null;
     
     const seat = seats.find(s => s.id === seatId);
-    if (!seat) return false;
+    if (!seat) return null;
 
+    const bookingId = Math.random().toString(36).substr(2, 9);
     const newBooking: VenueBooking = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: bookingId,
       userId: currentUser.id,
       eventId,
       seatId,
@@ -119,7 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setBookings(prev => [...prev, newBooking]);
-    return true;
+    return bookingId;
   };
 
   const confirmBooking = (bookingId: string) => {
@@ -145,6 +174,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{ 
       currentUser, setCurrentUser, events, seats, bookings, orders,
+      queueTimes, safetyLogs,
       lockSeat, bookSeat, confirmBooking, placeOrder 
     }}>
       {children}
