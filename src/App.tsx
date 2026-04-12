@@ -73,11 +73,11 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 };
 
 // --- SCREEN 2: EVENT DISCOVERY ---
-const DiscoveryScreen = ({ onSelectEvent }: { onSelectEvent: (id: string) => void }) => {
+const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
   const { events } = useApp();
   return (
     <div className="flex flex-col gap-6">
-      <Header title="Upcoming Events" />
+      <Header title="Upcoming Events" onBack={onBack} />
       {events.map(event => (
         <motion.div 
           key={event.id}
@@ -100,38 +100,50 @@ const DiscoveryScreen = ({ onSelectEvent }: { onSelectEvent: (id: string) => voi
 };
 
 // --- SCREEN 3: SEAT BOOKING ---
-const BookingScreen = ({ eventId, onConfirm }: { eventId: string, onConfirm: (bookingId: string) => void }) => {
-  const { seats, lockSeat, bookSeat } = useApp();
-  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+const BookingScreen = ({ eventId, onConfirm, onBack }: { eventId: string, onConfirm: (bookingId: string) => void, onBack: () => void }) => {
+  const { seats, lockSeat, unlockSeat, bookSeats } = useApp();
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSeatClick = (id: string) => {
-    if (lockSeat(id)) setSelectedSeat(id);
+    if (selectedSeats.includes(id)) {
+      unlockSeat(id);
+      setSelectedSeats(prev => prev.filter(s => s !== id));
+    } else {
+      if (lockSeat(id)) {
+        setSelectedSeats(prev => [...prev, id]);
+      }
+    }
   };
 
   const handleBook = async () => {
-    if (!selectedSeat) return;
-    const bookingId = await bookSeat(eventId, selectedSeat);
+    if (selectedSeats.length === 0) return;
+    setIsProcessing(true);
+    const bookingId = await bookSeats(eventId, selectedSeats);
+    setIsProcessing(false);
     if (bookingId) onConfirm(bookingId);
   };
 
   return (
     <div className="flex flex-col gap-6">
-      <Header onBack={() => {}} title="Select Your Seat" />
-      <div className="glass" style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+      <Header onBack={onBack} title="Select Seats" />
+      <div className="glass" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
         <div style={{ width: '80%', height: '4px', background: 'var(--accent-primary)', margin: '0 auto 2rem', borderRadius: '4px', opacity: 0.5 }}>FIELD / STAGE</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '8px' }}>
           {seats.filter(s => s.section === 'A').map(seat => (
             <button 
               key={seat.id}
-              disabled={seat.isBooked}
+              disabled={seat.isBooked && !selectedSeats.includes(seat.id)}
               onClick={() => handleSeatClick(seat.id)}
               style={{ 
                 aspectRatio: '1', 
                 borderRadius: '4px',
-                background: seat.isBooked ? '#1e293b' : (selectedSeat === seat.id ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)'),
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: seat.isBooked ? '#1e293b' : (selectedSeats.includes(seat.id) ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)'),
+                border: selectedSeats.includes(seat.id) ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
                 fontSize: '0.5rem',
-                color: 'white'
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
               {seat.id}
@@ -141,17 +153,19 @@ const BookingScreen = ({ eventId, onConfirm }: { eventId: string, onConfirm: (bo
       </div>
       <div className="glass flex justify-between items-center">
         <div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Selected Seat</p>
-          <p style={{ fontWeight: 800 }}>{selectedSeat || 'None'}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedSeats.length} Seats Selected</p>
+          <p style={{ fontWeight: 800 }}>{selectedSeats.join(', ') || 'None'}</p>
         </div>
-        <button onClick={handleBook} disabled={!selectedSeat} className="primary">PROCEED TO PAY</button>
+        <button onClick={handleBook} disabled={selectedSeats.length === 0 || isProcessing} className="primary">
+          {isProcessing ? 'PROCESSING...' : 'PROCEED TO PAY'}
+        </button>
       </div>
     </div>
   );
 };
 
 // --- SCREEN 4: PAYMENT ---
-const PaymentScreen = ({ bookingId, onComplete }: { bookingId: string, onComplete: () => void }) => {
+const PaymentScreen = ({ bookingId, onComplete, onBack }: { bookingId: string, onComplete: () => void, onBack: () => void }) => {
   const { confirmBooking } = useApp();
   
   const handlePayment = () => {
@@ -161,6 +175,7 @@ const PaymentScreen = ({ bookingId, onComplete }: { bookingId: string, onComplet
 
   return (
     <div className="flex flex-col gap-8 text-center pt-8">
+      <Header onBack={onBack} title="Checkout" />
       <div className="stat-icon" style={{ margin: '0 auto' }}><CreditCard size={32} /></div>
       <div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Secure Checkout</h2>
@@ -200,10 +215,10 @@ const TicketScreen = ({ bookingId, onEnter }: { bookingId: string, onEnter: () =
         </div>
         <div style={{ padding: '2rem' }}>
           <div className="grid grid-cols-2 gap-8">
-            <div><p className="badge badge-blue">SEAT</p><h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{booking.seatId}</h3></div>
-            <div><p className="badge badge-orange">GATE</p><h3 style={{ fontSize: '2rem', fontWeight: 900 }}>{seat?.gate}</h3></div>
-            <div><p className="badge badge-green">PARKING</p><h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{seat?.parking}</h3></div>
-            <div><p className="badge">SEC</p><h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{seat?.section}</h3></div>
+            <div><p className="badge badge-blue">SEATS</p><h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>{booking.seatIds.join(', ')}</h3></div>
+            <div><p className="badge badge-orange">GATE</p><h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>{seat?.gate}</h3></div>
+            <div><p className="badge badge-green">PARKING</p><h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{seat?.parking}</h3></div>
+            <div><p className="badge">SEC</p><h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{seat?.section}</h3></div>
           </div>
           <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '1rem', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
              <p style={{ fontSize: '0.75rem', fontWeight: 600 }}>{currentUser?.name}'s Holder ID: TX-9921</p>
@@ -392,16 +407,31 @@ const AppInner = () => {
           {step === 'login' && <LoginScreen onLogin={() => setStep('discovery')} />}
           
           {step === 'discovery' && (
-            <DiscoveryScreen onSelectEvent={(id) => { setActiveEventId(id); setStep('booking'); }} />
+            <DiscoveryScreen 
+              onSelectEvent={(id) => { setActiveEventId(id); setStep('booking'); }} 
+              onBack={() => setStep('login')}
+            />
           )}
 
           {step === 'booking' && activeEventId && (
-            <BookingScreen eventId={activeEventId} onConfirm={(id) => { setActiveBookingId(id); setStep('payment'); }} />
+            <BookingScreen 
+              eventId={activeEventId} 
+              onConfirm={(id) => { setActiveBookingId(id); setStep('payment'); }} 
+              onBack={() => setStep('discovery')}
+            />
           )}
 
-          {step === 'payment' && activeBookingId && <PaymentScreen bookingId={activeBookingId} onComplete={() => setStep('ticket')} />}
+          {step === 'payment' && activeBookingId && (
+            <PaymentScreen 
+              bookingId={activeBookingId} 
+              onComplete={() => setStep('ticket')} 
+              onBack={() => setStep('booking')}
+            />
+          )}
 
-          {step === 'ticket' && activeBookingId && <TicketScreen bookingId={activeBookingId} onEnter={() => setStep('venue')} />}
+          {step === 'ticket' && activeBookingId && (
+            <TicketScreen bookingId={activeBookingId} onEnter={() => setStep('venue')} />
+          )}
 
           {step === 'venue' && <VenueDashboard />}
         </motion.div>

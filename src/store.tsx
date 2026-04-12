@@ -32,7 +32,7 @@ export interface VenueBooking {
   id: string;
   userId: string;
   eventId: string;
-  seatId: string;
+  seatIds: string[];
   gate: number;
   parking: string;
   status: 'PENDING' | 'CONFIRMED';
@@ -69,8 +69,9 @@ interface AppContextType {
   orders: FoodOrder[];
   queueTimes: QueueTime[];
   safetyLogs: SafetyLog[];
-  bookSeat: (eventId: string, seatId: string) => Promise<string | null>;
+  bookSeats: (eventId: string, seatIds: string[]) => Promise<string | null>;
   lockSeat: (seatId: string) => boolean;
+  unlockSeat: (seatId: string) => void;
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
 }
@@ -121,7 +122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const lockSeat = (seatId: string) => {
     const seat = seats.find(s => s.id === seatId);
-    if (!seat || seat.isBooked || (seat.lockedUntil && seat.lockedUntil > Date.now())) return false;
+    if (!seat || seat.isBooked || (seat.lockedUntil && seat.lockedUntil > Date.now() && seat.lockedBy !== currentUser?.id)) return false;
     
     setSeats(prev => prev.map(s => 
       s.id === seatId ? { ...s, lockedUntil: Date.now() + 120000, lockedBy: currentUser?.id } : s
@@ -129,20 +130,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const bookSeat = async (eventId: string, seatId: string) => {
-    if (!currentUser) return null;
+  const unlockSeat = (seatId: string) => {
+    setSeats(prev => prev.map(s => 
+      s.id === seatId ? { ...s, lockedUntil: undefined, lockedBy: undefined } : s
+    ));
+  };
+
+  const bookSeats = async (eventId: string, seatIds: string[]) => {
+    if (!currentUser || seatIds.length === 0) return null;
     
-    const seat = seats.find(s => s.id === seatId);
-    if (!seat) return null;
+    const representativeSeat = seats.find(s => s.id === seatIds[0]);
+    if (!representativeSeat) return null;
 
     const bookingId = Math.random().toString(36).substr(2, 9);
     const newBooking: VenueBooking = {
       id: bookingId,
       userId: currentUser.id,
       eventId,
-      seatId,
-      gate: seat.gate,
-      parking: seat.parking,
+      seatIds,
+      gate: representativeSeat.gate,
+      parking: representativeSeat.parking,
       status: 'PENDING',
       timestamp: Date.now()
     };
@@ -156,7 +163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!booking) return;
 
     setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'CONFIRMED' } : b));
-    setSeats(prev => prev.map(s => s.id === booking.seatId ? { ...s, isBooked: true, lockedUntil: undefined, lockedBy: undefined } : s));
+    setSeats(prev => prev.map(s => booking.seatIds.includes(s.id) ? { ...s, isBooked: true, lockedUntil: undefined, lockedBy: undefined } : s));
   };
 
   const placeOrder = (seatId: string, items: any[]) => {
@@ -175,7 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider value={{ 
       currentUser, setCurrentUser, events, seats, bookings, orders,
       queueTimes, safetyLogs,
-      lockSeat, bookSeat, confirmBooking, placeOrder 
+      lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder 
     }}>
       {children}
     </AppContext.Provider>
