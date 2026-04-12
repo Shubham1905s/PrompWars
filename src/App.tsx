@@ -200,16 +200,16 @@ const PaymentScreen = ({ bookingId, onComplete, onBack }: { bookingId: string, o
 };
 
 // --- SCREEN 5: TICKET PASSPORT ---
-const TicketScreen = ({ bookingId, onEnter }: { bookingId: string, onEnter: () => void }) => {
+const TicketScreen = ({ bookingId, onEnter, onBack }: { bookingId: string, onEnter: () => void, onBack: () => void }) => {
   const { bookings, seats, currentUser } = useApp();
   const booking = bookings.find(b => b.id === bookingId);
-  const seat = seats.find(s => s.id === booking?.seatId);
+  const seat = seats.find(s => s.id === booking?.seatIds[0]);
 
   if (!booking) return null;
 
   return (
     <div className="flex flex-col gap-8">
-      <Header title="Your Digital Pass" />
+      <Header title="Your Digital Pass" onBack={onBack} />
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -301,12 +301,13 @@ const StadiumMap = () => (
 );
 
 // --- SCREEN 6: IN-VENUE EXPERIENCE ---
-const VenueDashboard = () => {
+const VenueDashboard = ({ onBack }: { onBack: () => void }) => {
   const [activeTab, setActiveTab] = useState<'map' | 'food' | 'status'>('map');
   const { placeOrder, queueTimes, safetyLogs } = useApp();
 
   return (
     <div className="flex flex-col gap-6">
+      <Header title="Venue Live" onBack={onBack} />
       <nav className="flex justify-around glass p-1" style={{ borderRadius: '1rem' }}>
          <button onClick={() => setActiveTab('map')} className={activeTab === 'map' ? 'tab-active' : 'tab-inactive'}><MapPin size={20} /></button>
          <button onClick={() => setActiveTab('food')} className={activeTab === 'food' ? 'tab-active' : 'tab-inactive'}><Coffee size={20} /></button>
@@ -460,10 +461,16 @@ const AppInner = () => {
           )}
 
           {step === 'ticket' && activeBookingId && (
-            <TicketScreen bookingId={activeBookingId} onEnter={() => setStep('venue')} />
+            <TicketScreen 
+              bookingId={activeBookingId} 
+              onEnter={() => setStep('venue')} 
+              onBack={() => setStep('booking')}
+            />
           )}
 
-          {step === 'venue' && <VenueDashboard />}
+          {step === 'venue' && (
+            <VenueDashboard onBack={() => setStep('discovery')} />
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
