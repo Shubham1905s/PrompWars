@@ -8,6 +8,7 @@ import {
   Clock, Shield, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 
 // --- SHARED COMPONENTS ---
 const Header = ({ onBack, title }: { onBack?: () => void, title?: string }) => (
@@ -98,9 +99,29 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
               onChange={e => setEmail(e.target.value)}
             />
             {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
-            <button type="submit" disabled={loading} className="primary py-4">
-              {loading ? 'CHECKING...' : 'CONTINUE'}
+            <button type="submit" className="primary py-4" disabled={loading}>
+              {loading ? 'Checking...' : 'Continue'}
             </button>
+
+            <div className="flex items-center gap-4 my-2 opacity-50">
+               <div className="flex-grow h-[1px] bg-white"></div>
+               <span className="text-[10px] font-bold">OR</span>
+               <div className="flex-grow h-[1px] bg-white"></div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin 
+                onSuccess={async (res) => {
+                  if (res.credential) {
+                    const ok = await loginGoogle(res.credential);
+                    if (ok) onLogin();
+                    else setError('Google Login Failed');
+                  }
+                }}
+                onError={() => setError('Google Login Error')}
+                width="340"
+              />
+            </div>
           </form>
         )}
 
