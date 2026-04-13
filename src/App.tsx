@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './store';
 import { 
   Users, MapPin, Zap, Bell, Search, 
@@ -190,7 +190,13 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 
 // --- MANAGER DASHBOARD ---
 const ManagerDashboard = () => {
-  const { queueTimes, safetyLogs, currentUser, logout } = useApp();
+  const { queueTimes, safetyLogs, currentUser, logout, updateQueueTime } = useApp();
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
+    return () => clearInterval(timer);
+  }, []);
   
   return (
     <div className="flex flex-col gap-6">
@@ -199,7 +205,7 @@ const ManagerDashboard = () => {
           <div className="logo-icon"><Zap size={20} /></div>
           <div>
             <h1 style={{ fontSize: '1.25rem', fontWeight: 900 }}>COMMAND CENTER</h1>
-            <p style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>STADIUM OPERATIONAL HUD</p>
+            <p style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>LIVE SYSTEM TIME: {time}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -209,7 +215,6 @@ const ManagerDashboard = () => {
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* HEATMAP RE-USED */}
         <div className="md:col-span-2 flex flex-col gap-6">
            <StadiumMap />
            
@@ -217,33 +222,37 @@ const ManagerDashboard = () => {
               <div className="glass border-l-4 border-blue-500">
                 <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>TOTAL ATTENDEES</p>
                 <h3 className="text-2xl font-black">42,850</h3>
-                <p style={{ fontSize: '0.6rem', color: '#10b981' }}>+4% vs last hour</p>
+                <p style={{ fontSize: '0.6rem', color: '#10b981' }}>LIVE UPDATING...</p>
               </div>
               <div className="glass border-l-4 border-orange-500">
-                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>AVG WAIT TIME</p>
-                <h3 className="text-2xl font-black">12 MIN</h3>
-                <p style={{ fontSize: '0.6rem', color: '#ef4444' }}>PEAK at Gate 2</p>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>SYSTEM STATUS</p>
+                <h3 className="text-2xl font-black">ACTIVE</h3>
+                <p style={{ fontSize: '0.6rem', color: '#10b981' }}>All systems nominal</p>
               </div>
               <div className="glass border-l-4 border-purple-500">
-                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>RESOURCES ACTIVE</p>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>STAFF ON SITE</p>
                 <h3 className="text-2xl font-black">124</h3>
-                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Staff & Medical</p>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>4 Medics deployed</p>
               </div>
            </div>
         </div>
 
-        {/* SIDE BAR STATUS */}
         <div className="flex flex-col gap-6">
            <div className="glass flex flex-col gap-4">
-              <h3 className="flex items-center gap-2 font-bold text-sm"><Activity size={16} /> GATE PRESSURE</h3>
+              <h3 className="flex items-center gap-2 font-bold text-sm"><Activity size={16} /> GATE CONTROL</h3>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Manually override or monitor gate pressure.</p>
               {queueTimes.map(q => (
-                <div key={q.area} className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[0.65rem]">
-                    <span>{q.area}</span>
+                <div key={q.area} className="flex flex-col gap-2 p-2 bg-slate-900/50 rounded-lg">
+                  <div className="flex justify-between text-[0.7rem]">
+                    <span className="font-bold">{q.area}</span>
                     <span style={{ color: q.status === 'CONGESTED' ? '#ef4444' : '#10b981' }}>{q.waitMinutes}m</span>
                   </div>
-                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(q.waitMinutes * 4, 100)}%`, background: q.status === 'CONGESTED' ? '#ef4444' : '#3b82f6' }} />
+                  <div className="flex gap-2">
+                    <button onClick={() => updateQueueTime(q.area, Math.max(0, q.waitMinutes - 1))} className="glass p-1 px-3 text-xs">-</button>
+                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden', flexGrow: 1, alignSelf: 'center' }}>
+                      <div style={{ height: '100%', width: `${Math.min(q.waitMinutes * 5, 100)}%`, background: q.status === 'CONGESTED' ? '#ef4444' : '#3b82f6', transition: 'width 0.3s ease' }} />
+                    </div>
+                    <button onClick={() => updateQueueTime(q.area, q.waitMinutes + 1)} className="glass p-1 px-3 text-xs">+</button>
                   </div>
                 </div>
               ))}
@@ -259,7 +268,6 @@ const ManagerDashboard = () => {
                   </div>
                 ))}
               </div>
-              <button className="primary w-full mt-4 py-2 text-xs">DISPATCH RESPONSE</button>
            </div>
         </div>
       </div>
@@ -270,6 +278,15 @@ const ManagerDashboard = () => {
 // --- SCREEN 2: EVENT DISCOVERY ---
 const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
   const { events, currentUser, logout } = useApp();
+  const [timeLeft, setTimeLeft] = useState('04:12:05'); // Dummy countdown
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // Logic for random countdown simulation
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <nav className="flex justify-between items-center glass">
@@ -277,7 +294,13 @@ const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string
            <div className="logo-icon"><Zap size={20} /></div>
            <h1 style={{ fontSize: '1rem', fontWeight: 900 }}>Hello, {currentUser?.name || 'Guest'}</h1>
         </div>
-        <button onClick={logout} className="glass p-2 hover:bg-red-500/20"><LogIn size={18} /></button>
+        <div className="flex items-center gap-4">
+           <div className="glass flex items-center gap-2 py-1 px-3" style={{ borderRadius: '2rem' }}>
+              <Clock size={14} className="text-orange-500" />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>LIVE: {timeLeft}</span>
+           </div>
+           <button onClick={logout} className="glass p-2 hover:bg-red-500/20"><LogIn size={18} /></button>
+        </div>
       </nav>
       
       <div className="flex flex-col gap-2">

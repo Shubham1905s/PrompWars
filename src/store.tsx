@@ -76,6 +76,7 @@ interface AppContextType {
   unlockSeat: (seatId: string) => void;
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
+  updateQueueTime: (area: string, minutes: number) => void;
   checkEmail: (email: string) => Promise<boolean>;
   signupOTP: (email: string) => Promise<boolean>;
   verifySignup: (data: any) => Promise<boolean>;
@@ -96,12 +97,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [bookings, setBookings] = useState<VenueBooking[]>([]);
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   
-  const queueTimes: QueueTime[] = [
+  const [queueTimes, setQueueTimes] = useState<QueueTime[]>([
     { area: 'Main Concourse', waitMinutes: 5, status: 'FLUID' },
     { area: 'Gate 2 Entrance', waitMinutes: 18, status: 'CONGESTED' },
     { area: 'South Food Court', waitMinutes: 12, status: 'BUSY' },
     { area: 'East Restrooms', waitMinutes: 2, status: 'FLUID' },
-  ];
+  ]);
 
   const safetyLogs: SafetyLog[] = [
     { id: '1', time: '14:20', message: 'Perimeter check clear.', officer: 'Sgt. Barnes' },
@@ -110,9 +111,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ];
 
   const events: StadiumEvent[] = [
-    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1000' },
-    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-05-22', time: '15:00', category: 'Tennis', image: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&q=80&w=1000' },
+    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-04-20', time: '19:00', category: 'Football', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1000' },
+    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-04-22', time: '15:00', category: 'Tennis', image: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&q=80&w=1000' },
   ];
+
+  const updateQueueTime = (area: string, minutes: number) => {
+    setQueueTimes(prev => prev.map(q => {
+      if (q.area === area) {
+        let status: 'FLUID' | 'BUSY' | 'CONGESTED' = 'FLUID';
+        if (minutes > 15) status = 'CONGESTED';
+        else if (minutes > 8) status = 'BUSY';
+        return { ...q, waitMinutes: minutes, status };
+      }
+      return q;
+    }));
+  };
 
   useEffect(() => {
     const initialSeats: Seat[] = [];
@@ -130,6 +143,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     });
     setSeats(initialSeats);
+
+    // Dynamic Simulation: Slightly fluctuate wait times
+    const interval = setInterval(() => {
+      setQueueTimes(prev => prev.map(q => ({
+        ...q,
+        waitMinutes: Math.max(1, q.waitMinutes + (Math.random() > 0.5 ? 1 : -1))
+      })));
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkEmail = async (email: string) => {
@@ -260,7 +283,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser, setCurrentUser, events, seats, bookings, orders,
       queueTimes, safetyLogs,
       lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
-      sendOTP, verifyOTP, logout
+      sendOTP: signupOTP, verifyOTP: verifySignup, // backwards compat if needed
+      checkEmail, signupOTP, verifySignup, login, logout,
+      updateQueueTime
     }}>
       {children}
     </AppContext.Provider>
