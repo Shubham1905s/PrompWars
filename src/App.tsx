@@ -16,7 +16,7 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import { AppProvider, useApp, type Seat, type StadiumEvent } from './store';
+import { AppProvider, useApp, type Seat } from './store';
 
 type SectionMeta = {
   id: string;
@@ -251,11 +251,6 @@ function AppContent() {
     }
   }, [activeSectionId, sections]);
 
-  const sectionById = useMemo(
-    () => new Map(sections.map((section) => [section.id, section])),
-    [sections],
-  );
-
   const seatPoints = useMemo(() => {
     const points: SeatPoint[] = [];
 
@@ -471,7 +466,7 @@ function AppContent() {
 
             <div className="stadium-canvas-wrap">
               <div className="stadium-shadow" />
-              <svg viewBox="0 0 1000 1000" className="stadium-canvas" aria-label="interactive seat map">
+              <svg viewBox="-80 -80 1160 1160" className="stadium-canvas" aria-label="interactive seat map">
                 <defs>
                   <radialGradient id="groundGlow" cx="50%" cy="50%" r="65%">
                     <stop offset="0%" stopColor="#4ca967" />
@@ -485,10 +480,34 @@ function AppContent() {
 
                 {sections.map((section) => {
                   const midAngle = (section.angleStart + section.angleEnd) / 2;
+                  const arcSpan = Math.abs(section.angleEnd - section.angleStart);
+                  let labelRadius = section.ringOuter + (arcSpan < 30 ? 32 : 48);
+                  let labelDx = 0;
+                  let labelDy = 0;
+                  let labelSize = arcSpan < 30 ? 18 : 22;
+
+                  if (section.id === 'PREMIUM') {
+                    labelRadius = section.ringOuter + 28;
+                    labelDx = 34;
+                    labelDy = 12;
+                    labelSize = 16;
+                  }
+
+                  if (section.id === 'SUITE') {
+                    labelRadius = section.ringOuter + 16;
+                    labelDx = -34;
+                    labelDy = -10;
+                    labelSize = 16;
+                  }
+
+                  if (section.id === 'BLOCK K') {
+                    labelDy = 12;
+                  }
+
                   const labelPoint = polarToCartesian(
                     viewportCenter,
                     viewportCenter,
-                    section.ringOuter + 62,
+                    labelRadius,
                     midAngle,
                   );
                   const isActive = section.id === activeSectionId;
@@ -505,10 +524,11 @@ function AppContent() {
                         onClick={() => setActiveSectionId(section.id)}
                       />
                       <text
-                        x={labelPoint.x}
-                        y={labelPoint.y}
+                        x={labelPoint.x + labelDx}
+                        y={labelPoint.y + labelDy}
                         textAnchor="middle"
                         className={`section-title ${isActive ? 'active' : ''}`}
+                        style={{ fontSize: `${labelSize}px` }}
                         onClick={() => setActiveSectionId(section.id)}
                       >
                         {section.shortLabel}
