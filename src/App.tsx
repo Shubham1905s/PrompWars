@@ -624,6 +624,22 @@ const StadiumMap = () => {
         />
      </svg>
      
+     {/* GATES */}
+     <div className="gate-marker" style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)' }}>G1</div>
+     <div className="gate-marker" style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)' }}>G3</div>
+     <div className="gate-marker" style={{ position: 'absolute', top: '50%', left: '10%', transform: 'translateY(-50%)' }}>G4</div>
+     <div className="gate-marker" style={{ position: 'absolute', top: '50%', right: '10%', transform: 'translateY(-50%)' }}>G2</div>
+
+     {/* LEGEND */}
+     <div style={{ position: 'absolute', bottom: 10, left: 10, pointerEvents: 'none' }}>
+        <p className="text-[10px] font-black opacity-30 uppercase tracking-widest mb-1">Live Stadium Density</p>
+        <div className="flex gap-2">
+           <div className="flex items-center gap-1"><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} /> <span className="text-[8px] opacity-50">FLUID</span></div>
+           <div className="flex items-center gap-1"><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b' }} /> <span className="text-[8px] opacity-50">BUSY</span></div>
+           <div className="flex items-center gap-1"><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} /> <span className="text-[8px] opacity-50">HEAVY</span></div>
+        </div>
+     </div>
+     
      {/* MARKERS */}
      <div style={{ position: 'absolute', top: '10%', left: '46%', color: 'var(--accent-primary)' }} className="pulse">
        <div className="flex items-center gap-1 glass p-1 px-2" style={{ borderRadius: '2rem', fontSize: '0.6rem', border: '1px solid var(--accent-primary)' }}>
@@ -638,6 +654,7 @@ const StadiumMap = () => {
      </div>
   </div>
 );
+};
 
 // --- SCREEN 6: IN-VENUE EXPERIENCE ---
 const InVenueExperience = ({ onBack }: { onBack: () => void }) => {
