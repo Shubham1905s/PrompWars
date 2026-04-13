@@ -29,6 +29,7 @@ export interface Seat {
   lockedBy?: string;
   gate: number;
   parking: string;
+  color: string;
 }
 
 export interface VenueBooking {
@@ -154,17 +155,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
+    const sections = [
+      { name: 'BIRLA BLOCK K', price: 1200, color: '#3b82f6', count: 40 },
+      { name: 'JIO BLOCK L', price: 1500, color: '#8b5cf6', count: 30 },
+      { name: 'ASTRAL BLOCK M', price: 2000, color: '#6d28d9', count: 30 },
+      { name: 'TORRENT BLOCK N', price: 3000, color: '#f59e0b', count: 25 },
+      { name: 'TORRENT BLOCK P', price: 6000, color: '#06b6d4', count: 20 },
+      { name: 'BKT TYRES BLOCK Q', price: 17000, color: '#ec4899', count: 15 },
+      { name: 'PRESIDENTIAL SUITE', price: 40000, color: '#94a3b8', count: 10 },
+      { name: 'SOUTH PREMIUM', price: 28000, color: '#10b981', count: 15 }
+    ];
+
     const initialSeats: Seat[] = [];
-    const sections = ['A', 'B', 'C', 'D', 'E', 'F'];
-    sections.forEach((sec, idx) => {
-      for (let i = 1; i <= 20; i++) {
+    sections.forEach((sec, sIdx) => {
+      for (let i = 1; i <= sec.count; i++) {
+        const words = sec.name.split(' ');
+        const identifier = words[words.length - 1];
         initialSeats.push({
-          id: `${sec}${i}`,
-          section: sec,
-          price: 150 + (idx * 20),
-          isBooked: false,
-          gate: idx + 1,
-          parking: `P${idx + 1}`
+          id: `${identifier}-${i}`,
+          section: sec.name,
+          price: sec.price,
+          isBooked: Math.random() < 0.3,
+          gate: sIdx + 1,
+          parking: `Zone P${sIdx + 1}`,
+          color: sec.color
         });
       }
     });
