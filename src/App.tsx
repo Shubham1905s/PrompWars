@@ -23,40 +23,57 @@ const Header = ({ onBack, title }: { onBack?: () => void, title?: string }) => (
 
 // --- SCREEN 1: LOGIN ---
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
-  const { sendOTP, verifyOTP } = useApp();
+  const { checkEmail, signupOTP, verifySignup, login: loginApi } = useApp();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [mode, setMode] = useState<'email' | 'login' | 'signup' | 'otp'>('email');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleEmailNext = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
     setError('');
-    const success = await sendOTP(email, name);
+    const exists = await checkEmail(email);
     setLoading(false);
-    if (success) {
-      setStep('otp');
+    if (exists) {
+      setMode('login');
     } else {
-      setError('Failed to send OTP. Please try again.');
+      setMode('signup');
     }
   };
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp) return;
     setLoading(true);
     setError('');
-    const success = await verifyOTP(email, otp);
+    const success = await loginApi(email, password);
     setLoading(false);
-    if (success) {
-      onLogin();
-    } else {
-      setError('Invalid OTP. Please check and try again.');
-    }
+    if (success) onLogin();
+    else setError('Invalid password. Please try again.');
+  };
+
+  const handleSignupNext = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const success = await signupOTP(email);
+    setLoading(false);
+    if (success) setMode('otp');
+    else setError('Failed to send verification code.');
+  };
+
+  const handleVerifySignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const success = await verifySignup({ email, otp, password, name });
+    setLoading(false);
+    if (success) onLogin();
+    else setError('Invalid code. Please check your email.');
   };
 
   return (
@@ -68,15 +85,10 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
       </div>
 
       <div className="glass" style={{ maxWidth: '400px', margin: '0 auto', width: '100%' }}>
-        {step === 'email' ? (
-          <form onSubmit={handleSendOTP} className="flex flex-col gap-4">
+        {mode === 'email' && (
+          <form onSubmit={handleEmailNext} className="flex flex-col gap-4">
             <h3 className="text-xl font-bold mb-2">Sign In</h3>
-            <input 
-              className="search-bar" 
-              placeholder="Full Name" 
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Enter your email to get started.</p>
             <input 
               className="search-bar" 
               placeholder="Email Address" 
@@ -87,13 +99,62 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
             />
             {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
             <button type="submit" disabled={loading} className="primary py-4">
-              {loading ? 'SENDING CODE...' : 'GET VERIFICATION CODE'}
+              {loading ? 'CHECKING...' : 'CONTINUE'}
             </button>
           </form>
-        ) : (
-          <form onSubmit={handleVerifyOTP} className="flex flex-col gap-4">
-            <h3 className="text-xl font-bold mb-2">Verify OTP</h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>We've sent a 6-digit code to <strong>{email}</strong></p>
+        )}
+
+        {mode === 'login' && (
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold mb-2">Welcome Back</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Enter password for <strong>{email}</strong></p>
+            <input 
+              className="search-bar" 
+              placeholder="Password" 
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
+            <button type="submit" disabled={loading} className="primary py-4">
+              {loading ? 'LOGGING IN...' : 'LOGIN'}
+            </button>
+            <button type="button" onClick={() => setMode('email')} className="text-sm text-blue-400 mt-2">Use different account</button>
+          </form>
+        )}
+
+        {mode === 'signup' && (
+          <form onSubmit={handleSignupNext} className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold mb-2">Create Account</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>New user detected. Please provide your details.</p>
+            <input 
+              className="search-bar" 
+              placeholder="Full Name" 
+              required
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+            <input 
+              className="search-bar" 
+              placeholder="New Password" 
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
+            <button type="submit" disabled={loading} className="primary py-4">
+              {loading ? 'SENDING OTP...' : 'SIGN UP & GET CODE'}
+            </button>
+            <button type="button" onClick={() => setMode('email')} className="text-sm text-blue-400 mt-2">Back</button>
+          </form>
+        )}
+
+        {mode === 'otp' && (
+          <form onSubmit={handleVerifySignup} className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold mb-2">Verify Email</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>We've sent a code to <strong>{email}</strong></p>
             <input 
               className="search-bar text-center text-2xl tracking-[1rem]" 
               placeholder="000000" 
@@ -103,10 +164,7 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
             />
             {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
             <button type="submit" disabled={loading} className="primary py-4">
-              {loading ? 'VERIFYING...' : 'VERIFY & LOGIN'}
-            </button>
-            <button type="button" onClick={() => setStep('email')} className="glass py-2" style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)' }}>
-              Change Email
+              {loading ? 'VERIFYING...' : 'COMPLETE SIGNUP'}
             </button>
           </form>
         )}

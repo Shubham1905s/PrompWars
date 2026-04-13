@@ -76,8 +76,10 @@ interface AppContextType {
   unlockSeat: (seatId: string) => void;
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
-  sendOTP: (email: string, name?: string) => Promise<boolean>;
-  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  checkEmail: (email: string) => Promise<boolean>;
+  signupOTP: (email: string) => Promise<boolean>;
+  verifySignup: (data: any) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -130,25 +132,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSeats(initialSeats);
   }, []);
 
-  const sendOTP = async (email: string, name?: string) => {
+  const checkEmail = async (email: string) => {
     try {
-      const res = await fetch(`${API_URL}/auth/send-otp`, {
+      const res = await fetch(`${API_URL}/auth/check-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name })
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      return data.exists;
+    } catch { return false; }
+  }
+
+  const signupOTP = async (email: string) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/signup-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
       return res.ok;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   };
 
-  const verifyOTP = async (email: string, otp: string) => {
+  const verifySignup = async (payload: any) => {
     try {
-      const res = await fetch(`${API_URL}/auth/verify-otp`, {
+      const res = await fetch(`${API_URL}/auth/verify-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp })
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         const data = await res.json();
@@ -158,9 +170,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       return false;
-    } catch {
+    } catch { return false; }
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
+        return true;
+      }
       return false;
-    }
+    } catch { return false; }
   };
 
   const logout = () => {
