@@ -4,8 +4,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  vehicle: string | null;
+  role: 'attendee' | 'manager' | 'staff';
+  phone?: string;
+  vehicle?: string | null;
 }
 
 export interface StadiumEvent {
@@ -75,12 +76,20 @@ interface AppContextType {
   unlockSeat: (seatId: string) => void;
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
+  sendOTP: (email: string, name?: string) => Promise<boolean>;
+  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const API_URL = 'http://localhost:5000/api';
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [seats, setSeats] = useState<Seat[]>([]);
   const [bookings, setBookings] = useState<VenueBooking[]>([]);
   const [orders, setOrders] = useState<FoodOrder[]>([]);
@@ -99,8 +108,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ];
 
   const events: StadiumEvent[] = [
-    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football', image: '/stadium1.png' },
-    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-05-22', time: '15:00', category: 'Tennis', image: '/stadium2.png' },
+    { id: '1', title: 'Global Champions Cup', teams: ['Strikers FC', 'Titans'], date: '2026-05-20', time: '19:00', category: 'Football', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1000' },
+    { id: '2', title: 'Grand Slam Finals', teams: ['Nadal', 'Alcaraz'], date: '2026-05-22', time: '15:00', category: 'Tennis', image: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&q=80&w=1000' },
   ];
 
   useEffect(() => {
@@ -120,6 +129,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     setSeats(initialSeats);
   }, []);
+
+  const sendOTP = async (email: string, name?: string) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name })
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const verifyOTP = async (email: string, otp: string) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+  };
 
   const lockSeat = (seatId: string) => {
     const seat = seats.find(s => s.id === seatId);
@@ -183,7 +231,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider value={{ 
       currentUser, setCurrentUser, events, seats, bookings, orders,
       queueTimes, safetyLogs,
-      lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder 
+      lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
+      sendOTP, verifyOTP, logout
     }}>
       {children}
     </AppContext.Provider>
@@ -195,3 +244,4 @@ export const useApp = () => {
   if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
 };
+

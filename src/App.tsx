@@ -23,61 +23,211 @@ const Header = ({ onBack, title }: { onBack?: () => void, title?: string }) => (
 
 // --- SCREEN 1: LOGIN ---
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
-  const { setCurrentUser } = useApp();
-  const [formData, setFormData] = useState({ name: '', email: '', vehicle: '' });
+  const { sendOTP, verifyOTP } = useApp();
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentUser({
-      id: 'USR1',
-      name: formData.name || 'Alex Johnson',
-      email: formData.email || 'alex@example.com',
-      phone: '+1 234 567 8900',
-      vehicle: formData.vehicle
-    });
-    onLogin();
+    if (!email) return;
+    setLoading(true);
+    setError('');
+    const success = await sendOTP(email, name);
+    setLoading(false);
+    if (success) {
+      setStep('otp');
+    } else {
+      setError('Failed to send OTP. Please try again.');
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) return;
+    setLoading(true);
+    setError('');
+    const success = await verifyOTP(email, otp);
+    setLoading(false);
+    if (success) {
+      onLogin();
+    } else {
+      setError('Invalid OTP. Please check and try again.');
+    }
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 py-12">
       <div className="text-center">
-        <h2 style={{ fontSize: '2rem', fontWeight: 900 }}>Welcome to Venue<span style={{ color: 'var(--accent-primary)' }}>Sync</span></h2>
-        <p style={{ color: 'var(--text-muted)' }}>Sign in to start your event journey</p>
+        <div className="logo-icon mx-auto mb-6" style={{ width: 80, height: 80 }}><Zap size={40} color="white" fill="white" /></div>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: 900 }}>Venue<span style={{ color: 'var(--accent-primary)' }}>Sync</span></h2>
+        <p style={{ color: 'var(--text-muted)' }}>Professional Stadium & Crowd Management</p>
       </div>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="glass flex flex-col gap-4">
-          <input 
-            className="search-bar w-full" 
-            placeholder="Full Name" 
-            style={{ width: '100%', display: 'block' }}
-            onChange={e => setFormData({...formData, name: e.target.value})}
-          />
-          <input 
-            className="search-bar w-full" 
-            placeholder="Email Address" 
-            onChange={e => setFormData({...formData, email: e.target.value})}
-          />
-          <div className="flex flex-col gap-2">
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Are you bringing a vehicle?</p>
+
+      <div className="glass" style={{ maxWidth: '400px', margin: '0 auto', width: '100%' }}>
+        {step === 'email' ? (
+          <form onSubmit={handleSendOTP} className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold mb-2">Sign In</h3>
             <input 
-              className="search-bar w-full" 
-              placeholder="Vehicle Number (Optional)" 
-              onChange={e => setFormData({...formData, vehicle: e.target.value})}
+              className="search-bar" 
+              placeholder="Full Name" 
+              value={name}
+              onChange={e => setName(e.target.value)}
             />
+            <input 
+              className="search-bar" 
+              placeholder="Email Address" 
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+            {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
+            <button type="submit" disabled={loading} className="primary py-4">
+              {loading ? 'SENDING CODE...' : 'GET VERIFICATION CODE'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOTP} className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold mb-2">Verify OTP</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>We've sent a 6-digit code to <strong>{email}</strong></p>
+            <input 
+              className="search-bar text-center text-2xl tracking-[1rem]" 
+              placeholder="000000" 
+              maxLength={6}
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+            />
+            {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
+            <button type="submit" disabled={loading} className="primary py-4">
+              {loading ? 'VERIFYING...' : 'VERIFY & LOGIN'}
+            </button>
+            <button type="button" onClick={() => setStep('email')} className="glass py-2" style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)' }}>
+              Change Email
+            </button>
+          </form>
+        )}
+      </div>
+      
+      <div className="flex justify-center gap-8 mt-4">
+         <div className="text-center">
+            <Shield size={20} className="mx-auto mb-2 text-blue-500" />
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Secure Auth</p>
+         </div>
+         <div className="text-center">
+            <Activity size={20} className="mx-auto mb-2 text-purple-500" />
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Real-time Sync</p>
+         </div>
+         <div className="text-center">
+            <Users size={20} className="mx-auto mb-2 text-pink-500" />
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Crowd Analytics</p>
+         </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MANAGER DASHBOARD ---
+const ManagerDashboard = () => {
+  const { queueTimes, safetyLogs, currentUser, logout } = useApp();
+  
+  return (
+    <div className="flex flex-col gap-6">
+      <nav className="flex justify-between items-center glass">
+        <div className="flex items-center gap-4">
+          <div className="logo-icon"><Zap size={20} /></div>
+          <div>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 900 }}>COMMAND CENTER</h1>
+            <p style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>STADIUM OPERATIONAL HUD</p>
           </div>
         </div>
-        <button type="submit" className="primary py-4 text-lg">CREATE ACCOUNT</button>
-      </form>
+        <div className="flex items-center gap-4">
+          <span className="badge badge-blue">OFFICER: {currentUser?.name}</span>
+          <button onClick={logout} className="glass p-2 hover:bg-red-500/20"><LogIn size={18} /></button>
+        </div>
+      </nav>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* HEATMAP RE-USED */}
+        <div className="md:col-span-2 flex flex-col gap-6">
+           <StadiumMap />
+           
+           <div className="grid grid-cols-3 gap-4">
+              <div className="glass border-l-4 border-blue-500">
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>TOTAL ATTENDEES</p>
+                <h3 className="text-2xl font-black">42,850</h3>
+                <p style={{ fontSize: '0.6rem', color: '#10b981' }}>+4% vs last hour</p>
+              </div>
+              <div className="glass border-l-4 border-orange-500">
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>AVG WAIT TIME</p>
+                <h3 className="text-2xl font-black">12 MIN</h3>
+                <p style={{ fontSize: '0.6rem', color: '#ef4444' }}>PEAK at Gate 2</p>
+              </div>
+              <div className="glass border-l-4 border-purple-500">
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>RESOURCES ACTIVE</p>
+                <h3 className="text-2xl font-black">124</h3>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Staff & Medical</p>
+              </div>
+           </div>
+        </div>
+
+        {/* SIDE BAR STATUS */}
+        <div className="flex flex-col gap-6">
+           <div className="glass flex flex-col gap-4">
+              <h3 className="flex items-center gap-2 font-bold text-sm"><Activity size={16} /> GATE PRESSURE</h3>
+              {queueTimes.map(q => (
+                <div key={q.area} className="flex flex-col gap-1">
+                  <div className="flex justify-between text-[0.65rem]">
+                    <span>{q.area}</span>
+                    <span style={{ color: q.status === 'CONGESTED' ? '#ef4444' : '#10b981' }}>{q.waitMinutes}m</span>
+                  </div>
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(q.waitMinutes * 4, 100)}%`, background: q.status === 'CONGESTED' ? '#ef4444' : '#3b82f6' }} />
+                  </div>
+                </div>
+              ))}
+           </div>
+
+           <div className="glass">
+              <h3 className="flex items-center gap-2 font-bold text-sm mb-4"><Shield size={16} /> INCIDENT LOG</h3>
+              <div className="flex flex-col gap-4">
+                {safetyLogs.map(log => (
+                  <div key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                    <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>{log.time} • {log.officer}</p>
+                    <p style={{ fontSize: '0.75rem' }}>{log.message}</p>
+                  </div>
+                ))}
+              </div>
+              <button className="primary w-full mt-4 py-2 text-xs">DISPATCH RESPONSE</button>
+           </div>
+        </div>
+      </div>
     </div>
   );
 };
 
 // --- SCREEN 2: EVENT DISCOVERY ---
 const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
-  const { events } = useApp();
+  const { events, currentUser, logout } = useApp();
   return (
     <div className="flex flex-col gap-6">
-      <Header title="Upcoming Events" onBack={onBack} />
+      <nav className="flex justify-between items-center glass">
+        <div className="flex items-center gap-4">
+           <div className="logo-icon"><Zap size={20} /></div>
+           <h1 style={{ fontSize: '1rem', fontWeight: 900 }}>Hello, {currentUser?.name || 'Guest'}</h1>
+        </div>
+        <button onClick={logout} className="glass p-2 hover:bg-red-500/20"><LogIn size={18} /></button>
+      </nav>
+      
+      <div className="flex flex-col gap-2">
+         <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Upcoming Matches</h2>
+         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Experience the stadium atmosphere with real-time crowd navigation.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {events.map(event => (
         <motion.div 
           key={event.id}
@@ -86,7 +236,7 @@ const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string
           className="glass cursor-pointer glow-hover"
           style={{ padding: 0, overflow: 'hidden' }}
         >
-          <div style={{ height: '160px', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ height: '180px', overflow: 'hidden', position: 'relative' }}>
              <img src={event.image} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--bg-dark), transparent)' }} />
              <span className="badge badge-blue" style={{ position: 'absolute', top: 12, left: 12 }}>{event.category}</span>
@@ -102,6 +252,7 @@ const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string
           </div>
         </motion.div>
       ))}
+      </div>
     </div>
   );
 };
@@ -421,12 +572,30 @@ const VenueDashboard = ({ onBack }: { onBack: () => void }) => {
 
 // --- MAIN ROUTER ---
 const AppInner = () => {
-  const [step, setStep] = useState<'login' | 'discovery' | 'booking' | 'payment' | 'ticket' | 'venue'>('login');
+  const { currentUser } = useApp();
+  const [step, setStep] = useState<'discovery' | 'booking' | 'payment' | 'ticket' | 'venue'>('discovery');
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
 
+  if (!currentUser) {
+    return (
+      <div className="container" style={{ maxWidth: '800px' }}>
+        <LoginScreen onLogin={() => setStep('discovery')} />
+      </div>
+    );
+  }
+
+  // If Manager, show Manager HUD
+  if (currentUser.role === 'manager') {
+    return (
+      <div className="container" style={{ maxWidth: '1200px' }}>
+        <ManagerDashboard />
+      </div>
+    );
+  }
+
   return (
-    <div className="container" style={{ maxWidth: '500px', padding: '1rem' }}>
+    <div className="container" style={{ maxWidth: step === 'discovery' ? '900px' : '500px', padding: '1rem' }}>
       <AnimatePresence mode="wait">
         <motion.div 
           key={step} 
@@ -435,12 +604,10 @@ const AppInner = () => {
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          {step === 'login' && <LoginScreen onLogin={() => setStep('discovery')} />}
-          
           {step === 'discovery' && (
             <DiscoveryScreen 
               onSelectEvent={(id) => { setActiveEventId(id); setStep('booking'); }} 
-              onBack={() => setStep('login')}
+              onBack={() => {}}
             />
           )}
 
