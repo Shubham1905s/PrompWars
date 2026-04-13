@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './store';
 import { 
-  Users, MapPin, Zap, Bell, Search, 
+  Users, MapPin, Zap, 
   ChevronRight, CreditCard, Ticket as TicketIcon, 
   Navigation, Coffee, User as UserIcon, LogIn,
-  ArrowLeft, CheckCircle, Smartphone, Activity, AlertTriangle,
-  Clock, Shield, Info
+  ArrowLeft, Smartphone, Activity, AlertTriangle,
+  Clock, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
@@ -333,7 +333,7 @@ const VendorDashboard = () => {
                <div className="bg-slate-900/50 p-3 rounded-lg flex flex-col gap-2">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
-                       <span>{item.name}</span>
+                       <span>{(item as any).name || item.itemId}</span>
                        <span className="opacity-50">x{item.quantity}</span>
                     </div>
                   ))}
@@ -352,13 +352,20 @@ const VendorDashboard = () => {
 };
 
 // --- SCREEN 2: EVENT DISCOVERY ---
-const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
+const DiscoveryScreen = ({ onSelectEvent, onBack: _onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
   const { events, currentUser, logout } = useApp();
-  const [timeLeft, setTimeLeft] = useState('04:12:05'); // Dummy countdown
+  const [timeLeft, setTimeLeft] = useState('04:12:05');
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Logic for random countdown simulation
+      setTimeLeft(prev => {
+        const parts = prev.split(':').map(Number);
+        let [h, m, s] = parts;
+        if (s > 0) s--;
+        else if (m > 0) { m--; s = 59; }
+        else if (h > 0) { h--; m = 59; s = 59; }
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -609,8 +616,8 @@ const StadiumMap = () => (
 );
 
 // --- SCREEN 6: IN-VENUE EXPERIENCE ---
-const VenueDashboard = ({ onBack }: { onBack: () => void }) => {
-  const [activeTab, setActiveTab] = useState<'map' | 'food' | 'status'>('map');
+const InVenueExperience = ({ onBack }: { onBack: () => void }) => {
+  const [activeTab, setActiveTab] = useState<'map' | 'food' | 'status' | 'pass'>('pass');
   const { placeOrder, queueTimes, safetyLogs } = useApp();
 
   return (
@@ -808,7 +815,8 @@ const ToastContainer = () => {
 
 const AppInner = () => {
   const { currentUser } = useApp();
-  const [view, setView] = useState<'discovery' | 'seats' | 'experience'>('discovery');
+  const [view, setView] = useState<'discovery' | 'seats' | 'payment' | 'ticket' | 'experience'>('discovery');
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   return (
@@ -842,8 +850,28 @@ const AppInner = () => {
               <motion.div key="seats" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <SeatSelectionScreen 
                   eventId={selectedEventId} 
-                  onConfirm={() => setView('experience')} 
+                  onConfirm={(bookingId) => { setActiveBookingId(bookingId); setView('payment'); }} 
                   onBack={() => setView('discovery')} 
+                />
+              </motion.div>
+            )}
+
+            {view === 'payment' && activeBookingId && (
+              <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <PaymentScreen 
+                  bookingId={activeBookingId} 
+                  onComplete={() => setView('ticket')} 
+                  onBack={() => setView('seats')} 
+                />
+              </motion.div>
+            )}
+
+            {view === 'ticket' && activeBookingId && (
+              <motion.div key="ticket" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                <TicketScreen 
+                  bookingId={activeBookingId} 
+                  onEnter={() => setView('experience')} 
+                  onBack={() => setView('payment')} 
                 />
               </motion.div>
             )}

@@ -357,7 +357,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser, setCurrentUser, events, seats, bookings, orders,
       queueTimes, safetyLogs,
       lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
-      sendOTP: signupOTP, verifyOTP: verifySignup, // backwards compat if needed
       checkEmail, signupOTP, verifySignup, login, loginGoogle, logout,
       updateQueueTime, notifications, clearNotification
     }}>
