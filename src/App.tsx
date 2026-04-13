@@ -23,7 +23,7 @@ const Header = ({ onBack, title }: { onBack?: () => void, title?: string }) => (
 
 // --- SCREEN 1: LOGIN ---
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
-  const { checkEmail, signupOTP, verifySignup, login: loginApi } = useApp();
+  const { checkEmail, signupOTP, verifySignup, login: loginApi, loginGoogle } = useApp();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');

@@ -91,6 +91,7 @@ interface AppContextType {
   signupOTP: (email: string) => Promise<boolean>;
   verifySignup: (data: any) => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
+  loginGoogle: (credential: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -266,6 +267,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch { return false; }
   };
 
+  const loginGoogle = async (credential: string) => {
+    try {
+      const res = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
+        return true;
+      }
+      return false;
+    } catch { return false; }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('user');
@@ -339,7 +358,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       queueTimes, safetyLogs,
       lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
       sendOTP: signupOTP, verifyOTP: verifySignup, // backwards compat if needed
-      checkEmail, signupOTP, verifySignup, login, logout,
+      checkEmail, signupOTP, verifySignup, login, loginGoogle, logout,
       updateQueueTime, notifications, clearNotification
     }}>
       {children}

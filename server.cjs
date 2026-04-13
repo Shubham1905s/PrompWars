@@ -196,5 +196,35 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// 5. Google SSO Login
+app.post('/api/auth/google', async (req, res) => {
+  const { credential } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: 'YOUR_GOOGLE_CLIENT_ID'
+    });
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId } = payload;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({ 
+        email, 
+        name, 
+        role: email === 'shubhammirashi303@gmail.com' ? 'manager' : 'attendee',
+        isVerified: true 
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    res.status(200).json({ token, user: { id: user._id, email: user.email, name: user.name, role: user.role } });
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    res.status(500).json({ message: 'Google authentication failed' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
