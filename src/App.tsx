@@ -275,6 +275,61 @@ const ManagerDashboard = () => {
   );
 };
 
+// --- VENDOR DASHBOARD ---
+const VendorDashboard = () => {
+  const { orders, logout, currentUser } = useApp();
+  
+  return (
+    <div className="flex flex-col gap-6">
+      <nav className="flex justify-between items-center glass">
+        <div className="flex items-center gap-4">
+          <div className="logo-icon bg-orange-500"><Coffee size={20} /></div>
+          <div>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 900 }}>VENDOR KITCHEN</h1>
+            <p style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>LIVE ORDERS • {currentUser?.name}</p>
+          </div>
+        </div>
+        <button onClick={logout} className="glass p-2 hover:bg-red-500/20"><LogIn size={18} /></button>
+      </nav>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {orders.length === 0 ? (
+          <div className="glass col-span-full py-20 text-center opacity-50">
+             <Coffee size={40} className="mx-auto mb-4" />
+             <p>No active orders in the queue.</p>
+          </div>
+        ) : (
+          orders.map(order => (
+            <div key={order.id} className="glass flex flex-col gap-4 border-l-4 border-orange-500">
+               <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-black text-lg">{order.id}</h3>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>SEAT: {order.seatId}</p>
+                  </div>
+                  <span className="badge badge-orange">{order.status}</span>
+               </div>
+               
+               <div className="bg-slate-900/50 p-3 rounded-lg flex flex-col gap-2">
+                  {order.items.map((item, idx) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                       <span>{item.name}</span>
+                       <span className="opacity-50">x{item.quantity}</span>
+                    </div>
+                  ))}
+               </div>
+
+               <div className="flex gap-2">
+                  <button className="primary flex-grow py-2 text-xs">PREPARE</button>
+                  <button className="glass flex-grow py-2 text-xs">READY</button>
+               </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
 // --- SCREEN 2: EVENT DISCOVERY ---
 const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
   const { events, currentUser, logout } = useApp();

@@ -87,6 +87,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const API_URL = 'http://localhost:5000/api';
+const socket = io('http://localhost:5000');
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -144,15 +145,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     setSeats(initialSeats);
 
-    // Dynamic Simulation: Slightly fluctuate wait times
-    const interval = setInterval(() => {
-      setQueueTimes(prev => prev.map(q => ({
-        ...q,
-        waitMinutes: Math.max(1, q.waitMinutes + (Math.random() > 0.5 ? 1 : -1))
-      })));
-    }, 10000);
+    // SOCKET LISTENERS
+    socket.on('seatLocked', ({ seatId, userId }) => {
+      setSeats(prev => prev.map(s => s.id === seatId ? { ...s, isBooked: true, lockedBy: userId } : s));
+    });
 
-    return () => clearInterval(interval);
+    socket.on('seatUnlocked', (seatId) => {
+      setSeats(prev => prev.map(s => s.id === seatId ? { ...s, isBooked: false, lockedBy: undefined } : s));
+    });
+
+    socket.on('crowdUpdate', (updates: { area: string, waitMinutes: number }[]) => {
+      updates.forEach(u => updateQueueTime(u.area, u.waitMinutes));
+    });
+
+    socket.on('newOrder', (order) => {
+      setOrders(prev => [...prev, order]);
+    });
+
+    return () => {
+      socket.off('seatLocked');
+      socket.off('seatUnlocked');
+      socket.off('crowdUpdate');
+      socket.off('newOrder');
+    };
   }, []);
 
   const checkEmail = async (email: string) => {
@@ -222,18 +237,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const lockSeat = (seatId: string) => {
     const seat = seats.find(s => s.id === seatId);
-    if (!seat || seat.isBooked || (seat.lockedUntil && seat.lockedUntil > Date.now() && seat.lockedBy !== currentUser?.id)) return false;
+    if (!seat || seat.isBooked) return false;
     
     setSeats(prev => prev.map(s => 
-      s.id === seatId ? { ...s, lockedUntil: Date.now() + 120000, lockedBy: currentUser?.id } : s
+      s.id === seatId ? { ...s, isBooked: true, lockedBy: currentUser?.id } : s
     ));
+    socket.emit('lockSeat', { seatId, userId: currentUser?.id });
     return true;
   };
 
   const unlockSeat = (seatId: string) => {
     setSeats(prev => prev.map(s => 
-      s.id === seatId ? { ...s, lockedUntil: undefined, lockedBy: undefined } : s
+      s.id === seatId ? { ...s, isBooked: false, lockedBy: undefined } : s
     ));
+    socket.emit('unlockSeat', seatId);
   };
 
   const bookSeats = async (eventId: string, seatIds: string[]) => {
@@ -276,6 +293,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'PLACED'
     };
     setOrders(prev => [...prev, newOrder]);
+    socket.emit('placeOrder', newOrder);
   };
 
   return (
