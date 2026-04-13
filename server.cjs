@@ -8,6 +8,9 @@ require('dotenv').config();
 
 const http = require('http');
 const { Server } = require('socket.io');
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with environment variable later
 
 const app = express();
 const server = http.createServer(app);
@@ -18,16 +21,23 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cors());
 
+// --- MEMORY STORAGE ---
+const locks = {}; // seatId -> userId
+
 // --- WEBSOCKET LOGIC ---
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
+  // Send current locks to the new client
+  socket.emit('initialLocks', locks);
+
   socket.on('lockSeat', (data) => {
-    // Broadcast to all other clients that a seat is locked
+    locks[data.seatId] = data.userId;
     socket.broadcast.emit('seatLocked', data);
   });
 
   socket.on('unlockSeat', (seatId) => {
+    delete locks[seatId];
     socket.broadcast.emit('seatUnlocked', seatId);
   });
 

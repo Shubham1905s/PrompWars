@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
 export interface User {
   id: string;
@@ -168,6 +169,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSeats(initialSeats);
 
     // SOCKET LISTENERS
+    socket.on('initialLocks', (initialLocks) => {
+      setSeats(prev => prev.map(s => {
+        if (initialLocks[s.id]) {
+          return { ...s, isBooked: true, lockedBy: initialLocks[s.id] };
+        }
+        return s;
+      }));
+    });
+
     socket.on('seatLocked', ({ seatId, userId }) => {
       setSeats(prev => prev.map(s => s.id === seatId ? { ...s, isBooked: true, lockedBy: userId } : s));
     });
@@ -330,7 +340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
       sendOTP: signupOTP, verifyOTP: verifySignup, // backwards compat if needed
       checkEmail, signupOTP, verifySignup, login, logout,
-      updateQueueTime
+      updateQueueTime, notifications, clearNotification
     }}>
       {children}
     </AppContext.Provider>

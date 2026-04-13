@@ -393,8 +393,8 @@ const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string
   );
 };
 
-// --- SCREEN 3: SEAT BOOKING ---
-const BookingScreen = ({ eventId, onConfirm, onBack }: { eventId: string, onConfirm: (bookingId: string) => void, onBack: () => void }) => {
+// --- SCREEN 3: SEAT SELECTION ---
+const SeatSelectionScreen = ({ eventId, onConfirm, onBack }: { eventId: string, onConfirm: (bookingId: string) => void, onBack: () => void }) => {
   const { seats, lockSeat, unlockSeat, bookSeats } = useApp();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -600,8 +600,52 @@ const VenueDashboard = ({ onBack }: { onBack: () => void }) => {
          <button onClick={() => setActiveTab('food')} className={activeTab === 'food' ? 'tab-active' : 'tab-inactive'}><Coffee size={20} /></button>
          <button onClick={() => setActiveTab('status')} className={activeTab === 'status' ? 'tab-active' : 'tab-inactive'}><Activity size={20} /></button>
       </nav>
+      
+      <div className="flex gap-4 border-b border-white/10 mb-6 overflow-x-auto">
+        <button onClick={() => setActiveTab('pass')} className={`pb-2 px-2 text-sm font-bold ${activeTab === 'pass' ? 'border-b-2 border-accent-primary' : 'opacity-50' }`}>MY PASS</button>
+        <button onClick={() => setActiveTab('status')} className={`pb-2 px-2 text-sm font-bold ${activeTab === 'status' ? 'border-b-2 border-accent-primary' : 'opacity-50' }`}>NAVIGATE</button>
+        <button onClick={() => setActiveTab('food')} className={`pb-2 px-2 text-sm font-bold ${activeTab === 'food' ? 'border-b-2 border-accent-primary' : 'opacity-50' }`}>FOOD</button>
+      </div>
 
       <AnimatePresence mode="wait">
+        {activeTab === 'pass' && (
+           <motion.div key="pass" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+              <div className="glass bg-white p-6 flex flex-col items-center gap-4 text-slate-900 shadow-2xl overflow-hidden relative" style={{ borderRadius: '24px' }}>
+                 <div className="flex justify-between w-full items-start mb-4">
+                    <div>
+                      <h4 className="text-xs font-black opacity-40 uppercase">Global Champions Cup</h4>
+                      <p className="text-lg font-black tracking-tighter">PREMIUM PASS</p>
+                    </div>
+                    <div className="bg-slate-900 text-white p-2 rounded-lg"><Zap size={16} /></div>
+                 </div>
+                 
+                 <div className="w-48 h-48 bg-slate-100 rounded-xl flex items-center justify-center p-4 border-2 border-dashed border-slate-300">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PASS-12345" alt="QR" className="w-full h-full opacity-80" />
+                 </div>
+
+                 <div className="grid grid-cols-2 w-full gap-4 mt-4">
+                    <div className="bg-slate-50 p-3 rounded-xl">
+                       <p className="text-[10px] opacity-40 font-bold uppercase">GATE</p>
+                       <p className="text-xl font-black">GATE 02</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-xl">
+                       <p className="text-[10px] opacity-40 font-bold uppercase">PARKING</p>
+                       <p className="text-xl font-black">ZONE P4</p>
+                    </div>
+                 </div>
+
+                 <div className="mt-4 pt-4 border-t border-slate-100 w-full text-center">
+                    <p className="text-xs font-bold opacity-60">ROW G • SEAT 42</p>
+                 </div>
+              </div>
+
+              <div className="glass border-l-4 border-blue-500">
+                 <p className="text-xs font-bold text-blue-400 mb-1">PARKING INSTRUCTIONS</p>
+                 <p className="text-sm">Enter via <strong>South Stadium Link</strong>. Parking Zone P4 is currently at 85% capacity.</p>
+              </div>
+           </motion.div>
+        )}
+
         {activeTab === 'map' && (
           <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
             <StadiumMap />
