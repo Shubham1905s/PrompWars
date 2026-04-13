@@ -340,8 +340,19 @@ const VendorDashboard = () => {
                </div>
 
                <div className="flex gap-2">
-                  <button className="primary flex-grow py-2 text-xs">PREPARE</button>
-                  <button className="glass flex-grow py-2 text-xs">READY</button>
+                  <button 
+                    onClick={() => updateOrderStatus(order.id, 'PREPARING')} 
+                    className="primary flex-grow py-2 text-xs"
+                    disabled={order.status === 'PREPARING'}
+                  >
+                    {order.status === 'PREPARING' ? 'COOKING...' : 'PREPARE'}
+                  </button>
+                  <button 
+                    onClick={() => updateOrderStatus(order.id, 'DELIVERED')} 
+                    className="glass flex-grow py-2 text-xs"
+                  >
+                    READY
+                  </button>
                </div>
             </div>
           ))
@@ -352,7 +363,7 @@ const VendorDashboard = () => {
 };
 
 // --- SCREEN 2: EVENT DISCOVERY ---
-const DiscoveryScreen = ({ onSelectEvent, onBack: _onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
+const DiscoveryScreen = ({ onSelectEvent, onBack }: { onSelectEvent: (id: string) => void, onBack: () => void }) => {
   const { events, currentUser, logout } = useApp();
   const [timeLeft, setTimeLeft] = useState('04:12:05');
 
@@ -556,7 +567,14 @@ const TicketScreen = ({ bookingId, onEnter, onBack }: { bookingId: string, onEnt
 };
 
 // --- STADIUM MAP COMPONENT ---
-const StadiumMap = () => (
+const StadiumMap = () => {
+  const { queueTimes } = useApp();
+  
+  // Find specific gate wait times for the heatmap
+  const gate2Wait = queueTimes.find(q => q.area === 'Gate 2 Entrance')?.waitMinutes || 0;
+  const concourseWait = queueTimes.find(q => q.area === 'Main Concourse')?.waitMinutes || 0;
+
+  return (
   <div className="glass map-container" style={{ height: '350px', background: '#020617', position: 'relative', overflow: 'hidden' }}>
      {/* STADIUM STRUCTURE */}
      <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
@@ -568,23 +586,29 @@ const StadiumMap = () => (
         <rect x="110" y="110" width="80" height="80" rx="5" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" strokeWidth="1" />
         <line x1="110" y1="150" x2="190" y2="150" stroke="#10b981" strokeWidth="0.5" />
         <circle cx="150" cy="150" r="15" fill="none" stroke="#10b981" strokeWidth="0.5" />
-        
-        {/* Stand Labels */}
-        <text x="150" y="60" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold">NORTH STAND</text>
-        <text x="150" y="250" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold">SOUTH STAND</text>
-        <text x="50" y="150" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold" transform="rotate(-90, 50, 150)">WEST STAND</text>
-        <text x="250" y="150" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontWeight="bold" transform="rotate(90, 250, 150)">EAST STAND</text>
      </svg>
      
-     {/* GATES */}
-     <div className="gate-marker" style={{ top: '10%', left: '50%', transform: 'translateX(-50%)' }}>G1</div>
-     <div className="gate-marker" style={{ bottom: '10%', left: '50%', transform: 'translateX(-50%)' }}>G3</div>
-     <div className="gate-marker" style={{ top: '50%', left: '10%', transform: 'translateY(-50%)' }}>G4</div>
-     <div className="gate-marker" style={{ top: '50%', right: '10%', transform: 'translateY(-50%)' }}>G2</div>
-
-     {/* HEATMAP BLOBS */}
-     <div className="heatmap-blob" style={{ top: '25%', left: '35%', width: '60px', height: '60px', background: 'rgba(239, 68, 68, 0.4)' }} />
-     <div className="heatmap-blob" style={{ top: '65%', left: '60%', width: '90px', height: '90px', background: 'rgba(245, 158, 11, 0.3)' }} />
+     {/* DYNAMIC HEATMAP BLOBS */}
+     <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 3, repeat: Infinity }}
+        className="heatmap-blob" 
+        style={{ 
+          top: '25%', left: '35%', 
+          width: 60 + concourseWait, height: 60 + concourseWait, 
+          background: concourseWait > 10 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(245, 158, 11, 0.3)' 
+        }} 
+     />
+     <motion.div 
+        animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.5, 0.2] }}
+        transition={{ duration: 4, repeat: Infinity }}
+        className="heatmap-blob" 
+        style={{ 
+          top: '50%', right: '5%', 
+          width: 40 + gate2Wait, height: 40 + gate2Wait, 
+          background: gate2Wait > 20 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.2)' 
+        }} 
+     />
      
      {/* NAVIGATION PATH */}
      <svg viewBox="0 0 300 300" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
@@ -714,7 +738,14 @@ const InVenueExperience = ({ onBack }: { onBack: () => void }) => {
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Prep time: 10m</p>
                     </div>
                   </div>
-                  <button onClick={() => placeOrder('A1', [{ itemId: item, quantity: 1 }])} className="primary py-2 px-4 text-xs">ADD • $12</button>
+                  <button 
+                    onClick={() => {
+                      placeOrder('A1', [{ itemId: item, quantity: 1, name: item }]);
+                    }} 
+                    className="primary py-2 px-4 text-xs"
+                  >
+                    ADD • $12
+                  </button>
                 </div>
              ))}
           </motion.div>

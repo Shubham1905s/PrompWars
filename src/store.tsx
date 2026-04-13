@@ -93,6 +93,7 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<boolean>;
   loginGoogle: (credential: string) => Promise<boolean>;
   logout: () => void;
+  updateOrderStatus: (orderId: string, status: 'PREPARING' | 'DELIVERED') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -200,6 +201,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setOrders(prev => [...prev, order]);
     });
 
+    socket.on('orderUpdated', ({ orderId, status }) => {
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+      if (status === 'DELIVERED') {
+        addNotification(`Order ${orderId} is ready for pickup!`, 'info');
+      }
+    });
+
     return () => {
       socket.off('seatLocked');
       socket.off('seatUnlocked');
@@ -285,6 +293,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch { return false; }
   };
 
+  const updateOrderStatus = (orderId: string, status: 'PREPARING' | 'DELIVERED') => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+    socket.emit('updateOrder', { orderId, status });
+  };
+
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('user');
@@ -358,7 +371,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       queueTimes, safetyLogs,
       lockSeat, unlockSeat, bookSeats, confirmBooking, placeOrder,
       checkEmail, signupOTP, verifySignup, login, loginGoogle, logout,
-      updateQueueTime, notifications, clearNotification
+      updateQueueTime, notifications, clearNotification, updateOrderStatus
     }}>
       {children}
     </AppContext.Provider>

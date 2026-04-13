@@ -46,6 +46,11 @@ io.on('connection', (socket) => {
     io.emit('newOrder', order);
   });
 
+  socket.on('updateOrder', (data) => {
+    // Notify attendee about their order status change
+    io.emit('orderUpdated', data);
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
