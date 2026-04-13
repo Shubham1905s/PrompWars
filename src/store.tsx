@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'attendee' | 'manager' | 'staff';
+  role: 'attendee' | 'manager' | 'staff' | 'vendor';
   phone?: string;
   vehicle?: string | null;
 }
@@ -62,6 +62,13 @@ export interface SafetyLog {
   officer: string;
 }
 
+export interface AppNotification {
+  id: string;
+  type: 'info' | 'warning' | 'alert';
+  message: string;
+  timestamp: number;
+}
+
 interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
@@ -77,6 +84,8 @@ interface AppContextType {
   confirmBooking: (bookingId: string) => void;
   placeOrder: (seatId: string, items: any[]) => void;
   updateQueueTime: (area: string, minutes: number) => void;
+  notifications: AppNotification[];
+  clearNotification: (id: string) => void;
   checkEmail: (email: string) => Promise<boolean>;
   signupOTP: (email: string) => Promise<boolean>;
   verifySignup: (data: any) => Promise<boolean>;
@@ -97,6 +106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [seats, setSeats] = useState<Seat[]>([]);
   const [bookings, setBookings] = useState<VenueBooking[]>([]);
   const [orders, setOrders] = useState<FoodOrder[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   
   const [queueTimes, setQueueTimes] = useState<QueueTime[]>([
     { area: 'Main Concourse', waitMinutes: 5, status: 'FLUID' },
@@ -127,6 +137,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return q;
     }));
   };
+  const addNotification = (message: string, type: 'info' | 'warning' | 'alert' = 'info') => {
+    setNotifications(prev => [{
+      id: Math.random().toString(36).substr(2, 9),
+      message,
+      type,
+      timestamp: Date.now()
+    }, ...prev].slice(0, 5));
+  };
+
+  const clearNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
 
   useEffect(() => {
     const initialSeats: Seat[] = [];
@@ -155,7 +177,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     socket.on('crowdUpdate', (updates: { area: string, waitMinutes: number }[]) => {
-      updates.forEach(u => updateQueueTime(u.area, u.waitMinutes));
+      updates.forEach(u => {
+        updateQueueTime(u.area, u.waitMinutes);
+        if (u.waitMinutes > 20) {
+           addNotification(`Alert: High congestion at ${u.area}!`, 'warning');
+        }
+      });
     });
 
     socket.on('newOrder', (order) => {

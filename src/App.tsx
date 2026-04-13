@@ -706,77 +706,92 @@ const VenueDashboard = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
-// --- MAIN ROUTER ---
-const AppInner = () => {
-  const { currentUser } = useApp();
-  const [step, setStep] = useState<'discovery' | 'booking' | 'payment' | 'ticket' | 'venue'>('discovery');
-  const [activeEventId, setActiveEventId] = useState<string | null>(null);
-  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
-
-  if (!currentUser) {
-    return (
-      <div className="container" style={{ maxWidth: '800px' }}>
-        <LoginScreen onLogin={() => setStep('discovery')} />
-      </div>
-    );
-  }
-
-  // If Manager, show Manager HUD
-  if (currentUser.role === 'manager') {
-    return (
-      <div className="container" style={{ maxWidth: '1200px' }}>
-        <ManagerDashboard />
-      </div>
-    );
-  }
-
+// --- NOTIFICATION TOASTS ---
+const ToastContainer = () => {
+  const { notifications, clearNotification } = useApp();
   return (
-    <div className="container" style={{ maxWidth: step === 'discovery' ? '900px' : '500px', padding: '1rem' }}>
-      <AnimatePresence mode="wait">
-        <motion.div 
-          key={step} 
-          initial={{ opacity: 0, scale: 0.95 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {step === 'discovery' && (
-            <DiscoveryScreen 
-              onSelectEvent={(id) => { setActiveEventId(id); setStep('booking'); }} 
-              onBack={() => {}}
-            />
-          )}
-
-          {step === 'booking' && activeEventId && (
-            <BookingScreen 
-              eventId={activeEventId} 
-              onConfirm={(id) => { setActiveBookingId(id); setStep('payment'); }} 
-              onBack={() => setStep('discovery')}
-            />
-          )}
-
-          {step === 'payment' && activeBookingId && (
-            <PaymentScreen 
-              bookingId={activeBookingId} 
-              onComplete={() => setStep('ticket')} 
-              onBack={() => setStep('booking')}
-            />
-          )}
-
-          {step === 'ticket' && activeBookingId && (
-            <TicketScreen 
-              bookingId={activeBookingId} 
-              onEnter={() => setStep('venue')} 
-              onBack={() => setStep('booking')}
-            />
-          )}
-
-          {step === 'venue' && (
-            <VenueDashboard onBack={() => setStep('discovery')} />
-          )}
-        </motion.div>
+    <div style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <AnimatePresence>
+        {notifications.map(n => (
+          <motion.div
+            key={n.id}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            onClick={() => clearNotification(n.id)}
+            className="glass shadow-2xl"
+            style={{ 
+              padding: '0.75rem 1.25rem', 
+              borderLeft: `4px solid ${n.type === 'warning' ? '#f59e0b' : n.type === 'alert' ? '#ef4444' : '#3b82f6'}`,
+              cursor: 'pointer',
+              minWidth: '250px'
+            }}
+          >
+            <div className="flex justify-between items-center gap-4">
+               <div>
+                 <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{n.type.toUpperCase()}</p>
+                 <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{n.message}</p>
+               </div>
+               <AlertTriangle size={14} className={n.type === 'warning' ? 'text-orange-500' : 'text-blue-500'} />
+            </div>
+          </motion.div>
+        ))}
       </AnimatePresence>
     </div>
+  );
+};
+
+const AppInner = () => {
+  const { currentUser } = useApp();
+  const [view, setView] = useState<'discovery' | 'seats' | 'experience'>('discovery');
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+  return (
+    <>
+      <ToastContainer />
+      {!currentUser ? (
+        <div className="container" style={{ maxWidth: '800px' }}>
+          <LoginScreen onLogin={() => setView('discovery')} />
+        </div>
+      ) : currentUser.role === 'manager' ? (
+        <div className="container py-8" style={{ maxWidth: '1400px' }}>
+          <ManagerDashboard />
+        </div>
+      ) : currentUser.role === 'vendor' ? (
+        <div className="container py-8" style={{ maxWidth: '1200px' }}>
+          <VendorDashboard />
+        </div>
+      ) : (
+        <div className="container py-8" style={{ maxWidth: view === 'discovery' ? '1200px' : '600px' }}>
+          <AnimatePresence mode="wait">
+            {view === 'discovery' && (
+              <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <DiscoveryScreen 
+                  onSelectEvent={(id) => { setSelectedEventId(id); setView('seats'); }} 
+                  onBack={() => {}} 
+                />
+              </motion.div>
+            )}
+
+            {view === 'seats' && selectedEventId && (
+              <motion.div key="seats" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <SeatSelectionScreen 
+                  eventId={selectedEventId} 
+                  onConfirm={() => setView('experience')} 
+                  onBack={() => setView('discovery')} 
+                />
+              </motion.div>
+            )}
+
+            {view === 'experience' && (
+              <motion.div key="experience" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                <InVenueExperience onBack={() => setView('discovery')} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </>
   );
 };
 
