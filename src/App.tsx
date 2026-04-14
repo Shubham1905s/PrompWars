@@ -61,7 +61,7 @@ async function request<T>(path: string, token?: string | null, init?: RequestIni
 function roleHome(role: Role) {
   if (role === 'vendor') return '/vendor/dashboard';
   if (role === 'admin') return '/admin/dashboard';
-  return '/venue-map';
+  return '/events';
 }
 
 function App() {
@@ -326,6 +326,16 @@ function App() {
         <Route path="/login" element={user ? <Navigate to={roleHome(user.role)} replace /> : <AuthPage mode="login" onSubmit={login} />} />
         <Route path="/register" element={user ? <Navigate to={roleHome(user.role)} replace /> : <AuthPage mode="register" onSubmit={register} />} />
         <Route
+          path="/events"
+          element={
+            <ProtectedRoute user={user} allow={['user']}>
+              <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
+                <EventsPage bootstrap={bootstrap} />
+              </PlatformLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/venue-map"
           element={
             <ProtectedRoute user={user} allow={['user']}>
@@ -506,11 +516,7 @@ function PlatformLayout({
   statusMessage: string;
   user: AppUser | null;
 }) {
-  const userLinks = [
-    { href: '/venue-map', label: 'Venue Map' },
-    { href: '/order-food', label: 'Order Food' },
-    { href: '/my-orders', label: 'My Orders' },
-  ];
+  const userLinks = [{ href: '/events', label: 'Events' }];
   const roleLinks =
     user?.role === 'vendor'
       ? [{ href: '/vendor/dashboard', label: 'Vendor Dashboard' }]
@@ -545,6 +551,75 @@ function PlatformLayout({
       </header>
       {statusMessage ? <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">{statusMessage}</div> : null}
       <div className="flex-1">{children}</div>
+    </div>
+  );
+}
+
+function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
+  const now = Date.now();
+  const featuredFromBootstrap = bootstrap
+    ? {
+        id: 'event-1',
+        sport: 'Cricket',
+        name: bootstrap.event.name,
+        venue: bootstrap.event.venue,
+        startsAt: bootstrap.event.startsAt,
+        endsAt: bootstrap.event.endsAt,
+      }
+    : null;
+  const sampleEvents = [
+    ...(featuredFromBootstrap ? [featuredFromBootstrap] : []),
+    { id: 'event-2', sport: 'Football', name: 'Derby Night 2026', venue: 'City Stadium', startsAt: new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-3', sport: 'Baseball', name: 'Season Opener', venue: 'Downtown Ballpark', startsAt: new Date(now + 6 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 6 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-4', sport: 'Tennis', name: 'Grand Slam Qualifiers', venue: 'Riverside Courts', startsAt: new Date(now + 9 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 9 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-5', sport: 'Basketball', name: 'All-Star Showcase', venue: 'Metropolitan Arena', startsAt: new Date(now + 12 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 12 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-6', sport: 'Hockey', name: 'Winter Classic', venue: 'Ice Dome', startsAt: new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 14 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-7', sport: 'Cricket', name: 'T20 Night Match', venue: 'Harbor Grounds', startsAt: new Date(now + 17 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 17 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-8', sport: 'Football', name: 'International Friendly', venue: 'National Park Stadium', startsAt: new Date(now + 20 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 20 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-9', sport: 'Baseball', name: 'Rivals Weekend', venue: 'Lakeside Field', startsAt: new Date(now + 24 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 24 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/events</p>
+        <h2 className="mt-2 text-2xl font-semibold text-white">Upcoming events</h2>
+        <p className="mt-2 text-sm text-slate-300">Select an event to open its live venue experience.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {sampleEvents.map((event) => (
+          <div key={event.id} className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                  {event.sport}
+                </p>
+                <h3 className="mt-3 text-xl font-semibold text-white">{event.name}</h3>
+                <p className="mt-2 text-sm text-slate-300">{event.venue}</p>
+              </div>
+              <div className="rounded-2xl bg-slate-950/40 p-3 text-slate-100">
+                <Ticket size={18} />
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between rounded-2xl bg-slate-950/40 px-4 py-3">
+                <span className="text-slate-400">Starts</span>
+                <span className="font-medium text-white">{new Date(event.startsAt).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl bg-slate-950/40 px-4 py-3">
+                <span className="text-slate-400">Ends</span>
+                <span className="font-medium text-white">{new Date(event.endsAt).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <Link className="mt-4 block rounded-full bg-sky-400 px-5 py-3 text-center font-semibold text-slate-950" to="/venue-map">
+              Open event
+            </Link>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

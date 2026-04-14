@@ -11,11 +11,13 @@ export function createSocketServer(httpServer, { corsOrigin = '*' } = {}) {
 
 export function registerSocketHandlers(io, { state, seatLockService, heatmapService }) {
   io.on('connection', (socket) => {
-    socket.emit('bootstrap', {
-      seats: state.seats,
-      heatmap: heatmapService.getSnapshot(),
-      orders: state.orders,
-    });
+    if (state?.seats && state?.orders) {
+      socket.emit('bootstrap', {
+        seats: state.seats,
+        heatmap: heatmapService.getSnapshot(),
+        orders: state.orders,
+      });
+    }
 
     socket.on('seat:lock', async (payload) => {
       try {
