@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+
+  mongo:
+    image: mongo:7
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_DATABASE: venueflow
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
