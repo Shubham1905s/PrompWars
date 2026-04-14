@@ -68,6 +68,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('venueflow-token'));
+  const [authChecked, setAuthChecked] = useState<boolean>(() => !localStorage.getItem('venueflow-token'));
   const [user, setUser] = useState<AppUser | null>(() => {
     const raw = localStorage.getItem('venueflow-user');
     return raw ? (JSON.parse(raw) as AppUser) : null;
@@ -82,16 +83,22 @@ function App() {
     if (!token) {
       setBootstrap(null);
       setGuidance(null);
+      setAuthChecked(true);
       return;
     }
 
     request<{ user: AppUser }>('/auth/me', token)
-      .then((data) => setUser(data.user))
+      .then((data) => {
+        setUser(data.user);
+      })
       .catch(() => {
         localStorage.removeItem('venueflow-token');
         localStorage.removeItem('venueflow-user');
         setToken(null);
         setUser(null);
+      })
+      .finally(() => {
+        setAuthChecked(true);
       });
   }, [token]);
 
@@ -189,6 +196,7 @@ function App() {
   const latestBooking = bootstrap?.bookings.at(-1) ?? null;
 
   const login = async (payload: AuthPayload) => {
+    setAuthChecked(false);
     const result = await request<{ token: string; user: AppUser }>('/auth/login', null, {
       method: 'POST',
       body: JSON.stringify({ email: payload.email, password: payload.password }),
@@ -197,10 +205,12 @@ function App() {
     localStorage.setItem('venueflow-user', JSON.stringify(result.user));
     setToken(result.token);
     setUser(result.user);
+    setAuthChecked(true);
     navigate(roleHome(result.user.role));
   };
 
   const register = async (payload: AuthPayload) => {
+    setAuthChecked(false);
     const result = await request<{ token: string; user: AppUser }>('/auth/register', null, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -209,6 +219,7 @@ function App() {
     localStorage.setItem('venueflow-user', JSON.stringify(result.user));
     setToken(result.token);
     setUser(result.user);
+    setAuthChecked(true);
     navigate(roleHome(result.user.role));
   };
 
@@ -219,6 +230,7 @@ function App() {
     setUser(null);
     setBootstrap(null);
     setActiveHold(null);
+    setAuthChecked(true);
     navigate('/login');
   };
 
@@ -322,13 +334,50 @@ function App() {
   return (
     <div className="min-h-screen bg-ink text-slate-50">
       <Routes>
-        <Route path="/" element={<Navigate to={user ? roleHome(user.role) : '/login'} replace />} />
-        <Route path="/login" element={user ? <Navigate to={roleHome(user.role)} replace /> : <AuthPage mode="login" onSubmit={login} />} />
-        <Route path="/register" element={user ? <Navigate to={roleHome(user.role)} replace /> : <AuthPage mode="register" onSubmit={register} />} />
+        <Route
+          path="/"
+          element={
+            !authChecked ? (
+              <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
+                <LoadingPanel label="Checking session..." />
+              </div>
+            ) : (
+              <Navigate to={user ? roleHome(user.role) : '/login'} replace />
+            )
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            !authChecked ? (
+              <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
+                <LoadingPanel label="Checking session..." />
+              </div>
+            ) : user ? (
+              <Navigate to={roleHome(user.role)} replace />
+            ) : (
+              <AuthPage mode="login" onSubmit={login} />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            !authChecked ? (
+              <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
+                <LoadingPanel label="Checking session..." />
+              </div>
+            ) : user ? (
+              <Navigate to={roleHome(user.role)} replace />
+            ) : (
+              <AuthPage mode="register" onSubmit={register} />
+            )
+          }
+        />
         <Route
           path="/events"
           element={
-            <ProtectedRoute user={user} allow={['user']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <EventsPage bootstrap={bootstrap} />
               </PlatformLayout>
@@ -338,7 +387,7 @@ function App() {
         <Route
           path="/venue-map"
           element={
-            <ProtectedRoute user={user} allow={['user']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <VenueMapPage
                   bootstrap={bootstrap}
@@ -355,7 +404,7 @@ function App() {
         <Route
           path="/order-food"
           element={
-            <ProtectedRoute user={user} allow={['user']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <OrderFoodPage bootstrap={bootstrap} latestBooking={latestBooking} placeOrder={placeOrder} />
               </PlatformLayout>
@@ -365,7 +414,7 @@ function App() {
         <Route
           path="/my-orders"
           element={
-            <ProtectedRoute user={user} allow={['user']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <MyOrdersPage bootstrap={bootstrap} latestBooking={latestBooking} />
               </PlatformLayout>
@@ -375,7 +424,7 @@ function App() {
         <Route
           path="/vendor/dashboard"
           element={
-            <ProtectedRoute user={user} allow={['vendor']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['vendor']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <VendorDashboardPage token={token} updateOrder={updateVendorOrder} />
               </PlatformLayout>
@@ -385,7 +434,7 @@ function App() {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute user={user} allow={['admin']}>
+            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['admin']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <AdminDashboardPage
                   snapshot={adminSnapshot}
@@ -402,8 +451,21 @@ function App() {
   );
 }
 
-function ProtectedRoute({ allow, children, user }: { allow: Role[]; children: ReactElement; user: AppUser | null }) {
-  if (!user) return <Navigate to="/login" replace />;
+function ProtectedRoute({
+  allow,
+  authChecked,
+  children,
+  token,
+  user,
+}: {
+  allow: Role[];
+  authChecked: boolean;
+  children: ReactElement;
+  token: string | null;
+  user: AppUser | null;
+}) {
+  if (!authChecked) return <LoadingPanel label="Checking session..." />;
+  if (!token || !user) return <Navigate to="/login" replace />;
   if (!allow.includes(user.role)) return <Navigate to={roleHome(user.role)} replace />;
   return children;
 }

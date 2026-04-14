@@ -156,6 +156,14 @@ export async function createPlatformServer({ disableIntervals = false } = {}) {
     }
   }
 
+  app.get('/', (_req, res) => {
+    res.json({
+      ok: true,
+      name: 'VenueFlow API',
+      health: '/api/health',
+    });
+  });
+
   app.get('/api/health', (_req, res) => {
     res.json({
       ok: true,

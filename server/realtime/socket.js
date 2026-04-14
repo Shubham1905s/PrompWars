@@ -1,9 +1,21 @@
 import { Server } from 'socket.io';
 
 export function createSocketServer(httpServer, { corsOrigin = '*' } = {}) {
+  const origin =
+    typeof corsOrigin === 'function'
+      ? (incomingOrigin, callback) => {
+          try {
+            const allowed = Boolean(corsOrigin(incomingOrigin));
+            callback(null, allowed);
+          } catch (error) {
+            callback(error, false);
+          }
+        }
+      : corsOrigin;
+
   return new Server(httpServer, {
     cors: {
-      origin: corsOrigin,
+      origin,
       methods: ['GET', 'POST', 'PATCH'],
     },
   });
