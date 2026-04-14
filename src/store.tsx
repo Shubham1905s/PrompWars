@@ -359,11 +359,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const confirmBooking = (bookingId: string) => {
-    const booking = bookings.find(b => b.id === bookingId);
-    if (!booking) return;
+    let confirmedSeatIds: string[] = [];
 
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'CONFIRMED' } : b));
-    setSeats(prev => prev.map(s => booking.seatIds.includes(s.id) ? { ...s, isBooked: true, lockedUntil: undefined, lockedBy: undefined } : s));
+    setBookings(prev => {
+      const booking = prev.find(b => b.id === bookingId);
+      if (!booking) return prev;
+      confirmedSeatIds = booking.seatIds;
+      return prev.map(b => b.id === bookingId ? { ...b, status: 'CONFIRMED' } : b);
+    });
+
+    if (!confirmedSeatIds.length) return;
+
+    setSeats(prev =>
+      prev.map(s =>
+        confirmedSeatIds.includes(s.id)
+          ? { ...s, isBooked: true, lockedUntil: undefined, lockedBy: undefined }
+          : s,
+      ),
+    );
   };
 
   const placeOrder = (seatId: string, items: any[]) => {
@@ -397,4 +410,3 @@ export const useApp = () => {
   if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
 };
-
