@@ -5,6 +5,7 @@
 :root {
   font-family: Inter, system-ui, sans-serif;
   color: #f8fafc;
+  color-scheme: dark;
   background:
     radial-gradient(circle at top left, rgba(79, 179, 255, 0.16), transparent 24%),
     radial-gradient(circle at bottom right, rgba(71, 196, 145, 0.16), transparent 28%),
@@ -19,7 +20,11 @@ body,
 
 body {
   margin: 0;
-  background: transparent;
+  background: inherit;
+  min-height: 100vh;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
