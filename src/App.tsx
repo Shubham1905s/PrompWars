@@ -41,14 +41,20 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:5000';
 
 async function request<T>(path: string, token?: string | null, init?: RequestInit): Promise<T> {
+  const controller = new AbortController();
+  const timeoutMs = 10000;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
+    signal: init?.signal ?? controller.signal,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   });
+  clearTimeout(timeout);
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Request failed' }));
@@ -196,31 +202,35 @@ function App() {
   const latestBooking = bootstrap?.bookings.at(-1) ?? null;
 
   const login = async (payload: AuthPayload) => {
-    setAuthChecked(false);
-    const result = await request<{ token: string; user: AppUser }>('/auth/login', null, {
-      method: 'POST',
-      body: JSON.stringify({ email: payload.email, password: payload.password }),
-    });
-    localStorage.setItem('venueflow-token', result.token);
-    localStorage.setItem('venueflow-user', JSON.stringify(result.user));
-    setToken(result.token);
-    setUser(result.user);
-    setAuthChecked(true);
-    navigate(roleHome(result.user.role));
+    try {
+      const result = await request<{ token: string; user: AppUser }>('/auth/login', null, {
+        method: 'POST',
+        body: JSON.stringify({ email: payload.email, password: payload.password }),
+      });
+      localStorage.setItem('venueflow-token', result.token);
+      localStorage.setItem('venueflow-user', JSON.stringify(result.user));
+      setToken(result.token);
+      setUser(result.user);
+      navigate(roleHome(result.user.role));
+    } finally {
+      setAuthChecked(true);
+    }
   };
 
   const register = async (payload: AuthPayload) => {
-    setAuthChecked(false);
-    const result = await request<{ token: string; user: AppUser }>('/auth/register', null, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    localStorage.setItem('venueflow-token', result.token);
-    localStorage.setItem('venueflow-user', JSON.stringify(result.user));
-    setToken(result.token);
-    setUser(result.user);
-    setAuthChecked(true);
-    navigate(roleHome(result.user.role));
+    try {
+      const result = await request<{ token: string; user: AppUser }>('/auth/register', null, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      localStorage.setItem('venueflow-token', result.token);
+      localStorage.setItem('venueflow-user', JSON.stringify(result.user));
+      setToken(result.token);
+      setUser(result.user);
+      navigate(roleHome(result.user.role));
+    } finally {
+      setAuthChecked(true);
+    }
   };
 
   const logout = () => {
