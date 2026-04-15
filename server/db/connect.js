@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 let connectionPromise = null;
 
 export async function connectMongo() {
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI ?? process.env.MONGODB_URI;
   if (!uri) return { enabled: false, mongoose };
 
   // Keep unit/integration tests hermetic and fast by default.
