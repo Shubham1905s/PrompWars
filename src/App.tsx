@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock3,
   Coffee,
+  Search,
   LogOut,
   MapPin,
   ShieldCheck,
@@ -84,6 +85,7 @@ function App() {
   const [guidance, setGuidance] = useState<Guidance | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [adminSnapshot, setAdminSnapshot] = useState<DashboardPayload | null>(null);
+  const [paymentReceipt, setPaymentReceipt] = useState<{ booking: Booking; guidance: Guidance } | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -280,6 +282,7 @@ function App() {
     });
     setActiveHold(null);
     setGuidance(result.guidance);
+    setPaymentReceipt(result);
     await refreshUserData();
     setStatusMessage(`Booking confirmed for ${result.booking.seatIds.join(', ')}.`);
   };
@@ -349,7 +352,7 @@ function App() {
           element={
             !authChecked ? (
               <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
-                <LoadingPanel label="Checking session..." />
+                <LoadingPanel label="Checking session..." className="w-full max-w-md" />
               </div>
             ) : (
               <Navigate to={user ? roleHome(user.role) : '/login'} replace />
@@ -361,7 +364,7 @@ function App() {
           element={
             !authChecked ? (
               <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
-                <LoadingPanel label="Checking session..." />
+                <LoadingPanel label="Checking session..." className="w-full max-w-md" />
               </div>
             ) : user ? (
               <Navigate to={roleHome(user.role)} replace />
@@ -375,7 +378,7 @@ function App() {
           element={
             !authChecked ? (
               <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
-                <LoadingPanel label="Checking session..." />
+                <LoadingPanel label="Checking session..." className="w-full max-w-md" />
               </div>
             ) : user ? (
               <Navigate to={roleHome(user.role)} replace />
@@ -406,6 +409,8 @@ function App() {
                   lockSeats={lockSeats}
                   releaseHold={releaseHold}
                   confirmPayment={confirmPayment}
+                  paymentReceipt={paymentReceipt}
+                  dismissReceipt={() => setPaymentReceipt(null)}
                 />
               </PlatformLayout>
             </ProtectedRoute>
@@ -598,36 +603,68 @@ function PlatformLayout({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-5 md:px-6">
-      <header className="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-white/5 px-5 py-4 backdrop-blur md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">VenueFlow</p>
-          <h1 className="text-2xl font-semibold text-white">Smart venue orchestration</h1>
-        </div>
-        <nav className="flex flex-wrap gap-2">
-          {roleLinks.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${location === item.href ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100'}`}
-            >
-              {item.label}
+      <header className="sticky top-4 z-20">
+        <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-1 shadow-glow backdrop-blur">
+          <div className="flex flex-col gap-4 rounded-[24px] bg-white/5 px-5 py-4 md:flex-row md:items-center md:justify-between">
+            <Link to="/events" className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-sky-400/25 to-emerald-400/15 text-sky-100 ring-1 ring-white/10">
+                <Waves size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">VenueFlow</p>
+                <h1 className="text-lg font-semibold text-white md:text-xl">Smart venue orchestration</h1>
+              </div>
             </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-200">{user?.name}</div>
-          <button onClick={logout} className="rounded-full bg-white/5 p-3 text-slate-100">
-            <LogOut size={16} />
-          </button>
+
+            <nav className="flex flex-wrap items-center gap-2 md:justify-center">
+              <div className="flex flex-wrap gap-2 rounded-full border border-white/10 bg-slate-950/40 p-1">
+                {roleLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      location === item.href
+                        ? 'bg-sky-400 text-slate-950 shadow-[0_10px_30px_rgba(79,179,255,0.20)]'
+                        : 'text-slate-100 hover:bg-white/10'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+
+            <div className="flex items-center justify-between gap-3 md:justify-end">
+              <div className="flex items-center gap-3">
+                <div className="hidden rounded-full border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-slate-200 md:block">
+                  {user?.name}
+                </div>
+                <button
+                  onClick={logout}
+                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-slate-950/40 p-3 text-slate-100 transition hover:bg-white/10"
+                  aria-label="Log out"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {statusMessage ? (
+          <div className="mt-3 rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100 backdrop-blur">
+            {statusMessage}
+          </div>
+        ) : null}
       </header>
-      {statusMessage ? <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">{statusMessage}</div> : null}
       <div className="flex-1">{children}</div>
     </div>
   );
 }
 
 function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
+  const [query, setQuery] = useState('');
+  const [activeSport, setActiveSport] = useState<string>('All');
   const now = Date.now();
   const featuredFromBootstrap = bootstrap
     ? {
@@ -651,31 +688,102 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
     { id: 'event-9', sport: 'Baseball', name: 'Rivals Weekend', venue: 'Lakeside Field', startsAt: new Date(now + 24 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 24 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
   ];
 
+  const sports = useMemo(() => {
+    const unique = Array.from(new Set(sampleEvents.map((event) => event.sport))).sort();
+    return ['All', ...unique];
+  }, [sampleEvents]);
+
+  const filteredEvents = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return sampleEvents.filter((event) => {
+      if (activeSport !== 'All' && event.sport !== activeSport) return false;
+      if (!normalized) return true;
+      return (
+        event.name.toLowerCase().includes(normalized) ||
+        event.venue.toLowerCase().includes(normalized) ||
+        event.sport.toLowerCase().includes(normalized)
+      );
+    });
+  }, [activeSport, query, sampleEvents]);
+
   return (
     <div className="space-y-6">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/events</p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">Upcoming events</h2>
-        <p className="mt-2 text-sm text-slate-300">Select an event to open its live venue experience.</p>
+      <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 backdrop-blur">
+        <div className="relative px-6 py-7 sm:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/15 via-transparent to-emerald-500/10" />
+          <div className="relative">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">Events</p>
+            <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="text-3xl font-semibold text-white sm:text-4xl">Pick your match night.</h2>
+                <p className="mt-3 max-w-2xl text-sm text-slate-300">
+                  Browse upcoming sports events and open the live venue experience with seat locking, heatmap routing, and in-seat orders.
+                </p>
+              </div>
+              <Link
+                className="inline-flex items-center justify-center rounded-full bg-sky-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
+                to="/venue-map"
+              >
+                Open venue experience
+                <ArrowRight className="ml-2" size={16} />
+              </Link>
+            </div>
+
+            <div className="mt-6 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-300">
+                  <Search size={18} />
+                </div>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search by event, venue, or sport..."
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950/50 py-3 pl-12 pr-4 text-sm text-slate-100 placeholder:text-slate-400 focus:border-sky-300/50 focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sports.map((sport) => (
+                  <button
+                    key={sport}
+                    onClick={() => setActiveSport(sport)}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      activeSport === sport ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100 hover:bg-white/10'
+                    }`}
+                  >
+                    {sport}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {sampleEvents.map((event) => (
-          <div key={event.id} className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-            <div className="flex items-start justify-between gap-3">
+        {filteredEvents.map((event) => (
+          <div
+            key={event.id}
+            className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10"
+          >
+            <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
+              <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-sky-400/10 blur-2xl" />
+              <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-emerald-400/10 blur-2xl" />
+            </div>
+
+            <div className="relative flex items-start justify-between gap-3">
               <div>
-                <p className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                <p className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
                   {event.sport}
                 </p>
                 <h3 className="mt-3 text-xl font-semibold text-white">{event.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{event.venue}</p>
               </div>
-              <div className="rounded-2xl bg-slate-950/40 p-3 text-slate-100">
+              <div className="rounded-2xl bg-slate-950/40 p-3 text-slate-100 transition group-hover:bg-slate-950/55">
                 <Ticket size={18} />
               </div>
             </div>
 
-            <div className="mt-4 space-y-2 text-sm">
+            <div className="relative mt-4 grid gap-2 text-sm">
               <div className="flex items-center justify-between rounded-2xl bg-slate-950/40 px-4 py-3">
                 <span className="text-slate-400">Starts</span>
                 <span className="font-medium text-white">{new Date(event.startsAt).toLocaleString()}</span>
@@ -686,12 +794,22 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
               </div>
             </div>
 
-            <Link className="mt-4 block rounded-full bg-sky-400 px-5 py-3 text-center font-semibold text-slate-950" to="/venue-map">
+            <Link
+              className="relative mt-4 inline-flex w-full items-center justify-center rounded-full bg-sky-400 px-5 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
+              to="/venue-map"
+            >
               Open event
+              <ArrowRight className="ml-2" size={16} />
             </Link>
           </div>
         ))}
       </div>
+
+      {!filteredEvents.length ? (
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
+          No events match your search. Try a different keyword or filter.
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -712,6 +830,8 @@ function VenueMapPage({
   confirmPayment,
   guidance,
   lockSeats,
+  paymentReceipt,
+  dismissReceipt,
   releaseHold,
 }: {
   activeHold: Hold | null;
@@ -719,6 +839,8 @@ function VenueMapPage({
   confirmPayment: () => Promise<void>;
   guidance: Guidance | null;
   lockSeats: (seatIds: string[]) => Promise<void>;
+  paymentReceipt: { booking: Booking; guidance: Guidance } | null;
+  dismissReceipt: () => void;
   releaseHold: () => Promise<void>;
 }) {
   const [selectedSection, setSelectedSection] = useState<string>('');
@@ -734,6 +856,11 @@ function VenueMapPage({
   }, [sections, selectedSection]);
 
   const visibleSeats = (bootstrap?.seats ?? []).filter((seat) => seat.sectionId === selectedSection);
+  const selectedSeatObjects = useMemo(() => {
+    const byId = new Map((bootstrap?.seats ?? []).map((seat) => [seat.id, seat] as const));
+    return selectedSeats.map((id) => byId.get(id)).filter(Boolean) as Seat[];
+  }, [bootstrap?.seats, selectedSeats]);
+  const selectedTotal = useMemo(() => selectedSeatObjects.reduce((sum, seat) => sum + seat.price, 0), [selectedSeatObjects]);
   const holdCountdown = activeHold
     ? Math.max(0, Math.floor((Date.parse(activeHold.expiresAt) - Date.now()) / 1000))
     : 0;
@@ -741,79 +868,207 @@ function VenueMapPage({
   if (!bootstrap) return <LoadingPanel label="Loading venue state..." />;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-4">
-          <StatCard icon={Users} title="Live occupancy" value={`${bootstrap.zones.reduce((sum, zone) => sum + zone.occupancy, 0)}`} caption="Across all tracked zones" />
-          <StatCard icon={Clock3} title="Fastest gate" value={guidance?.recommendedGate ?? 'Gate A'} caption="Least congested arrival" />
-          <StatCard icon={Car} title="Parking" value={guidance?.recommendedParking ?? 'P1'} caption="Recommended parking zone" />
-          <StatCard icon={ShieldCheck} title="Active holds" value={activeHold ? '1' : '0'} caption="10-minute checkout lock" />
+    <>
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatCard
+              icon={Users}
+              title="Live occupancy"
+              value={`${bootstrap.zones.reduce((sum, zone) => sum + zone.occupancy, 0)}`}
+              caption="Across tracked zones"
+            />
+            <StatCard icon={Clock3} title="Fastest gate" value={guidance?.recommendedGate ?? 'Gate A'} caption="Heatmap recommendation" />
+            <StatCard icon={Car} title="Parking" value={guidance?.recommendedParking ?? 'P1'} caption="Suggested zone" />
+            <StatCard icon={ShieldCheck} title="Seat hold" value={activeHold ? 'Active' : 'None'} caption="10-minute lock window" />
+          </div>
+
+          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 backdrop-blur">
+            <div className="relative px-6 py-6 sm:px-7">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/10 via-transparent to-emerald-500/10" />
+              <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">Venue map</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{bootstrap.event.name}</h2>
+                  <p className="mt-2 text-sm text-slate-300">
+                    Select seats, lock them for checkout, and complete a dummy payment to confirm.
+                  </p>
+                  <p className="mt-3 text-xs text-slate-400">
+                    {bootstrap.event.venue} • {new Date(bootstrap.event.startsAt).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 rounded-[24px] border border-white/10 bg-slate-950/40 p-2">
+                  {sections.map((section) => (
+                    <button
+                      key={section}
+                      onClick={() => setSelectedSection(section)}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        selectedSection === section ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100 hover:bg-white/10'
+                      }`}
+                    >
+                      {section}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-5 border-t border-white/10 p-5 lg:grid-cols-[1fr_0.9fr]">
+              <SeatGrid
+                seats={visibleSeats}
+                selectedSeats={selectedSeats}
+                activeHold={activeHold}
+                onToggle={(seatId) =>
+                  setSelectedSeats((current) =>
+                    current.includes(seatId) ? current.filter((item) => item !== seatId) : [...current, seatId],
+                  )
+                }
+              />
+              <HeatmapPanel zones={bootstrap.zones} guidance={guidance} />
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/venue-map</p>
-              <h2 className="text-2xl font-semibold text-white">{bootstrap.event.name}</h2>
-              <p className="mt-2 text-sm text-slate-300">
-                Heatmap-informed venue map with seat locking, live wait times, and dynamic gate instructions.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {sections.map((section) => (
-                <button key={section} onClick={() => setSelectedSection(section)} className={`rounded-full px-4 py-2 text-sm ${selectedSection === section ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100'}`}>
-                  {section}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.88fr]">
-            <SeatGrid
-              seats={visibleSeats}
-              selectedSeats={selectedSeats}
-              activeHold={activeHold}
-              onToggle={(seatId) =>
-                setSelectedSeats((current) =>
-                  current.includes(seatId) ? current.filter((item) => item !== seatId) : [...current, seatId],
-                )
-              }
-            />
-            <HeatmapPanel zones={bootstrap.zones} guidance={guidance} />
-          </div>
-
-          <div className="mt-6 rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm text-slate-200">Selected seats: {selectedSeats.join(', ') || 'None yet'}</p>
-                <p className="text-xs text-slate-400">
-                  {activeHold
-                    ? `Hold expires in ${Math.floor(holdCountdown / 60)}m ${holdCountdown % 60}s`
-                    : 'Locks are stored for 10 minutes during checkout.'}
-                </p>
+        <aside className="space-y-6">
+          <div className="sticky top-28 space-y-6">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Checkout</h3>
+                <span className="rounded-full bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+                  {activeHold ? 'Hold active' : 'Select seats'}
+                </span>
               </div>
-              <div className="flex flex-wrap gap-3">
+
+              <div className="mt-4 space-y-3">
+                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-sm text-slate-300">Selected seats</p>
+                  <p className="mt-2 text-base font-semibold text-white">
+                    {selectedSeats.length ? selectedSeats.join(', ') : 'None yet'}
+                  </p>
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <span className="text-slate-400">Total</span>
+                    <span className="font-semibold text-white">₹{selectedTotal}</span>
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-sm text-slate-300">Arrival guidance</p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    Gate <span className="font-semibold text-white">{guidance?.recommendedGate ?? 'Gate A'}</span> • Parking{' '}
+                    <span className="font-semibold text-white">{guidance?.recommendedParking ?? 'P1'}</span>
+                  </p>
+                  <p className="mt-2 text-xs text-slate-400">
+                    {activeHold
+                      ? `Hold expires in ${Math.floor(holdCountdown / 60)}m ${holdCountdown % 60}s`
+                      : 'Lock seats to start a 10-minute checkout hold.'}
+                  </p>
+                </div>
+
                 {!activeHold ? (
-                  <button onClick={() => lockSeats(selectedSeats)} disabled={!selectedSeats.length} className="rounded-full bg-sky-400 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40">
-                    Lock selected seats
+                  <button
+                    onClick={() => lockSeats(selectedSeats)}
+                    disabled={!selectedSeats.length}
+                    className="w-full rounded-full bg-sky-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Lock seats & start checkout
                   </button>
                 ) : (
-                  <>
-                    <button onClick={releaseHold} className="rounded-full bg-white/5 px-5 py-3 font-semibold text-white">Release hold</button>
-                    <button onClick={confirmPayment} className="rounded-full bg-emerald-400 px-5 py-3 font-semibold text-slate-950">Confirm dummy payment</button>
-                  </>
+                  <div className="grid gap-3">
+                    <button
+                      onClick={confirmPayment}
+                      className="w-full rounded-full bg-emerald-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-300"
+                    >
+                      Confirm dummy payment
+                    </button>
+                    <button
+                      onClick={releaseHold}
+                      className="w-full rounded-full bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+                    >
+                      Release hold
+                    </button>
+                  </div>
                 )}
+
+                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-sm font-semibold text-white">Seat status legend</p>
+                  <div className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded bg-white/10 ring-1 ring-white/10" />
+                      Available
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded bg-sky-400/25 ring-1 ring-sky-300/40" />
+                      Selected
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded bg-amber-500/15 ring-1 ring-amber-300/30" />
+                      Locked
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded bg-white/5 ring-1 ring-white/5" />
+                      Booked
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <LatestBookingCard booking={bootstrap.bookings.at(-1) ?? null} />
+            <NotificationsPanel notifications={bootstrap.notifications} />
           </div>
-        </div>
+        </aside>
       </div>
 
-      <aside className="space-y-6">
-        <LatestBookingCard booking={bootstrap.bookings.at(-1) ?? null} />
-        <NotificationsPanel notifications={bootstrap.notifications} />
-      </aside>
-    </div>
+      {paymentReceipt ? (
+        <Modal onClose={dismissReceipt} title="Payment confirmed">
+          <div className="space-y-4">
+            <div className="rounded-[22px] border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-50">
+              Dummy payment succeeded. Your booking is confirmed.
+            </div>
+            <div className="grid gap-3">
+              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
+                <span className="text-sm text-slate-300">Booking</span>
+                <span className="font-semibold text-white">{paymentReceipt.booking.id.slice(0, 8)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
+                <span className="text-sm text-slate-300">Seats</span>
+                <span className="font-semibold text-white">{paymentReceipt.booking.seatIds.join(', ')}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
+                <span className="text-sm text-slate-300">Amount</span>
+                <span className="font-semibold text-white">₹{paymentReceipt.booking.amount}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
+                <span className="text-sm text-slate-300">Gate / Parking</span>
+                <span className="font-semibold text-white">
+                  {paymentReceipt.booking.gate} • {paymentReceipt.booking.parkingZone}
+                </span>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => {
+                  dismissReceipt();
+                  setSelectedSeats([]);
+                }}
+                className="rounded-full bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+              >
+                Continue browsing
+              </button>
+              <Link
+                to="/events"
+                onClick={dismissReceipt}
+                className="inline-flex items-center justify-center rounded-full bg-sky-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-sky-300"
+              >
+                Back to events
+                <ArrowRight className="ml-2" size={16} />
+              </Link>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+    </>
   );
 }
 
@@ -1015,12 +1270,18 @@ function SeatGrid({
   selectedSeats: string[];
 }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Section seat matrix</h3>
-        <span className="rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300">Seat locking via Redis TTL</span>
+    <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-5">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Select your seats</h3>
+          <p className="mt-1 text-sm text-slate-300">Tap to select. Locked/booked seats are unavailable.</p>
+        </div>
+        <span className="w-fit rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300">
+          Seat locking via Redis TTL
+        </span>
       </div>
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-4 xl:grid-cols-6">
+
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-5 xl:grid-cols-6">
         {seats.map((seat) => {
           const disabled = seat.status === 'booked' || (seat.status === 'locked' && !selectedSeats.includes(seat.id));
           return (
@@ -1028,14 +1289,59 @@ function SeatGrid({
               key={seat.id}
               onClick={() => onToggle(seat.id)}
               disabled={disabled || Boolean(activeHold)}
-              className={`rounded-2xl border px-3 py-4 text-left transition ${selectedSeats.includes(seat.id) ? 'border-sky-300 bg-sky-400/20' : seat.status === 'booked' ? 'border-white/5 bg-white/5 text-slate-500' : seat.status === 'locked' ? 'border-amber-300/30 bg-amber-500/10 text-amber-100' : 'border-white/10 bg-white/5 hover:border-sky-300/40'}`}
+              className={`rounded-2xl border px-3 py-4 text-left transition focus:outline-none focus:ring-2 focus:ring-sky-300/40 ${
+                selectedSeats.includes(seat.id)
+                  ? 'border-sky-300 bg-sky-400/20'
+                  : seat.status === 'booked'
+                    ? 'border-white/5 bg-white/5 text-slate-500'
+                    : seat.status === 'locked'
+                      ? 'border-amber-300/30 bg-amber-500/10 text-amber-100'
+                      : 'border-white/10 bg-white/5 hover:border-sky-300/40 hover:bg-white/10'
+              }`}
             >
-              <p className="text-xs text-slate-300">{seat.row}{seat.number}</p>
-              <p className="mt-2 font-semibold">{seat.id}</p>
+              <p className="text-xs text-slate-300">
+                Row {seat.row} • Seat {seat.number}
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white">{seat.sectionId}-{seat.row}{seat.number}</p>
               <p className="mt-1 text-xs text-slate-400">₹{seat.price}</p>
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+  title,
+}: {
+  children: ReactElement;
+  onClose: () => void;
+  title: string;
+}) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4 backdrop-blur" role="dialog" aria-modal="true">
+      <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/80 shadow-glow">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <button
+            onClick={onClose}
+            className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
+          >
+            Close
+          </button>
+        </div>
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>
   );
@@ -1142,9 +1448,9 @@ function StatCard({ caption, icon: Icon, title, value }: { caption: string; icon
   );
 }
 
-function LoadingPanel({ label }: { label: string }) {
+function LoadingPanel({ className = '', label }: { className?: string; label: string }) {
   return (
-    <div className="grid min-h-[320px] place-items-center rounded-[28px] border border-white/10 bg-white/5 text-slate-200">
+    <div className={`grid min-h-[320px] w-full place-items-center rounded-[28px] border border-white/10 bg-white/5 text-slate-200 ${className}`}>
       {label}
     </div>
   );
