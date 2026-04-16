@@ -36,6 +36,25 @@ import {
 } from 'lucide-react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
+// Firebase imports
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User, updateProfile } from 'firebase/auth';
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDw-B67Kh5PkLxuS5XTJDiwkXtzbpLS4Sw",
+  authDomain: "promptwars-f22dc.firebaseapp.com",
+  projectId: "promptwars-f22dc",
+  storageBucket: "promptwars-f22dc.firebasestorage.app",
+  messagingSenderId: "720960866733",
+  appId: "1:720960866733:web:420f41a9862db63f837924",
+  measurementId: "G-MBTKBQPMJ8"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 type Role = 'user' | 'vendor' | 'admin' | 'delivery';
 type AppUser = { email: string; id: string; name: string; role: Role };
 type EventInfo = { endsAt: string; id: string; name: string; startsAt: string; venue: string };
@@ -62,17 +81,19 @@ const defaultOrigin = import.meta.env.VITE_API_URL
 const API_URL = import.meta.env.VITE_API_URL ?? `${defaultOrigin}/api`;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? defaultOrigin;
 
-async function request<T>(path: string, token?: string | null, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
   const timeoutMs = 10000;
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  const authToken = await auth.currentUser?.getIdToken();
 
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     signal: init?.signal ?? controller.signal,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(init?.headers ?? {}),
     },
   });
@@ -95,12 +116,9 @@ function roleHome(role: Role) {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('venueflow-token'));
-  const [authChecked, setAuthChecked] = useState<boolean>(() => !localStorage.getItem('venueflow-token'));
-  const [user, setUser] = useState<AppUser | null>(() => {
-    const raw = localStorage.getItem('venueflow-user');
-    return raw ? (JSON.parse(raw) as AppUser) : null;
-  });
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [bootstrap, setBootstrap] = useState<BootstrapPayload | null>(null);
   const [activeHold, setActiveHold] = useState<Hold | null>(null);
   const [guidance, setGuidance] = useState<Guidance | null>(null);
@@ -109,158 +127,148 @@ function App() {
   const [paymentReceipt, setPaymentReceipt] = useState<{ booking: Booking; guidance: Guidance } | null>(null);
 
   useEffect(() => {
-    if (!token) {
-      setBootstrap(null);
-      setGuidance(null);
-      setAuthChecked(true);
-      return;
-    }
-
-    request<{ user: AppUser }>('/auth/me', token)
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch(() => {
-        localStorage.removeItem('venueflow-token');
-        localStorage.removeItem('venueflow-user');
-        setToken(null);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setFirebaseUser(user);
+      if (user) {
+        // Set user from Firebase
+        setUser({
+          id: user.uid,
+          email: user.email!,
+          name: user.displayName || user.email!.split('@')[0],
+          role: 'user' // Default role, can be updated later
+        });
+      } else {
         setUser(null);
-      })
-      .finally(() => {
-        setAuthChecked(true);
-      });
-  }, [token]);
+        setBootstrap(null);
+        setGuidance(null);
+      }
+      setAuthChecked(true);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
-    if (!token || !user || user.role !== 'user') return;
-    request<BootstrapPayload>('/bootstrap', token)
+    if (!firebaseUser || !user || user.role !== 'user') return;
+    request<BootstrapPayload>('/bootstrap')
       .then((data) => {
         setBootstrap(data);
         setGuidance(data.guidance);
       })
       .catch((error: Error) => setStatusMessage(error.message));
-  }, [token, user]);
+  }, [firebaseUser, user]);
 
   useEffect(() => {
-    if (!token || !user) return;
+    if (!firebaseUser || !user) return;
 
-    const connection = io(SOCKET_URL, {
-      auth: { token },
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 500,
-      reconnectionDelayMax: 5000,
-      transports: ['websocket'],
-    });
-
-    connection.on('connect', () => setStatusMessage('Live updates connected'));
-    connection.on('seat:lock', ({ seatIds, userId: lockingUserId, expiresAt }) => {
-      setBootstrap((current) =>
-        current
-          ? {
-              ...current,
-              seats: current.seats.map((seat) =>
-                seatIds.includes(seat.id)
-                  ? { ...seat, status: 'locked', lockedBy: lockingUserId, holdExpiresAt: expiresAt }
-                  : seat,
-              ),
-            }
-          : current,
-      );
-    });
-    connection.on('seat:release', ({ seatIds }) => {
-      setBootstrap((current) =>
-        current
-          ? {
-              ...current,
-              seats: current.seats.map((seat) =>
-                seatIds.includes(seat.id)
-                  ? { ...seat, status: 'available', lockedBy: null, holdExpiresAt: null }
-                  : seat,
-              ),
-            }
-          : current,
-      );
-    });
-    connection.on('seat:confirmed', ({ seatIds }) => {
-      setBootstrap((current) =>
-        current
-          ? {
-              ...current,
-              seats: current.seats.map((seat) =>
-                seatIds.includes(seat.id)
-                  ? { ...seat, status: 'booked', lockedBy: null, holdExpiresAt: null }
-                  : seat,
-              ),
-            }
-          : current,
-      );
-    });
-    connection.on('heatmap:update', (zones: Zone[]) => {
-      setBootstrap((current) => (current ? { ...current, zones } : current));
-      setAdminSnapshot((current) => (current ? { ...current, zones } : current));
-    });
-    connection.on('order:status-update', ({ orderId, status }) => {
-      setBootstrap((current) =>
-        current
-          ? {
-              ...current,
-              orders: current.orders.map((order) => (order.id === orderId ? { ...order, status } : order)),
-            }
-          : current,
-      );
-    });
-    connection.on('notification:parking', (notification: Notification) => {
-      setBootstrap((current) =>
-        current ? { ...current, notifications: [...current.notifications, notification].slice(-6) } : current,
-      );
-    });
-    connection.on('seat:error', ({ message }) => setStatusMessage(message));
-
-    return () => {
-      connection.close();
+    const getToken = async () => {
+      const token = await firebaseUser.getIdToken();
+      return token;
     };
-  }, [token, user]);
+
+    getToken().then((token) => {
+      const connection = io(SOCKET_URL, {
+        auth: { token },
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 500,
+        reconnectionDelayMax: 5000,
+        transports: ['websocket'],
+      });
+
+      connection.on('connect', () => setStatusMessage('Live updates connected'));
+      connection.on('seat:lock', ({ seatIds, userId: lockingUserId, expiresAt }) => {
+        setBootstrap((current) =>
+          current
+            ? {
+                ...current,
+                seats: current.seats.map((seat) =>
+                  seatIds.includes(seat.id)
+                    ? { ...seat, status: 'locked', lockedBy: lockingUserId, holdExpiresAt: expiresAt }
+                    : seat,
+                ),
+              }
+            : current,
+        );
+      });
+      connection.on('seat:release', ({ seatIds }) => {
+        setBootstrap((current) =>
+          current
+            ? {
+                ...current,
+                seats: current.seats.map((seat) =>
+                  seatIds.includes(seat.id)
+                    ? { ...seat, status: 'available', lockedBy: null, holdExpiresAt: null }
+                    : seat,
+                ),
+              }
+            : current,
+        );
+      });
+      connection.on('seat:confirmed', ({ seatIds }) => {
+        setBootstrap((current) =>
+          current
+            ? {
+                ...current,
+                seats: current.seats.map((seat) =>
+                  seatIds.includes(seat.id)
+                    ? { ...seat, status: 'booked', lockedBy: null, holdExpiresAt: null }
+                    : seat,
+                ),
+              }
+            : current,
+        );
+      });
+      connection.on('heatmap:update', (zones: Zone[]) => {
+        setBootstrap((current) => (current ? { ...current, zones } : current));
+        setAdminSnapshot((current) => (current ? { ...current, zones } : current));
+      });
+      connection.on('order:status-update', ({ orderId, status }) => {
+        setBootstrap((current) =>
+          current
+            ? {
+                ...current,
+                orders: current.orders.map((order) => (order.id === orderId ? { ...order, status } : order)),
+              }
+            : current,
+        );
+      });
+      connection.on('notification:parking', (notification: Notification) => {
+        setBootstrap((current) =>
+          current ? { ...current, notifications: [...current.notifications, notification].slice(-6) } : current,
+        );
+      });
+      connection.on('seat:error', ({ message }) => setStatusMessage(message));
+
+      return () => {
+        connection.close();
+      };
+    });
+  }, [firebaseUser, user]);
 
   const latestBooking = bootstrap?.bookings.at(-1) ?? null;
 
   const login = async (payload: AuthPayload) => {
     try {
-      const result = await request<{ token: string; user: AppUser }>('/auth/login', null, {
-        method: 'POST',
-        body: JSON.stringify({ email: payload.email, password: payload.password }),
-      });
-      localStorage.setItem('venueflow-token', result.token);
-      localStorage.setItem('venueflow-user', JSON.stringify(result.user));
-      setToken(result.token);
-      setUser(result.user);
-      navigate(roleHome(result.user.role));
-    } finally {
-      setAuthChecked(true);
+      await signInWithEmailAndPassword(auth, payload.email, payload.password);
+      navigate(roleHome(user?.role || 'user'));
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
     }
   };
 
   const register = async (payload: AuthPayload) => {
     try {
-      const result = await request<{ token: string; user: AppUser }>('/auth/register', null, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-      localStorage.setItem('venueflow-token', result.token);
-      localStorage.setItem('venueflow-user', JSON.stringify(result.user));
-      setToken(result.token);
-      setUser(result.user);
-      navigate(roleHome(result.user.role));
-    } finally {
-      setAuthChecked(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
+      // Update display name
+      await updateProfile(userCredential.user, { displayName: payload.name });
+      navigate(roleHome(user?.role || 'user'));
+    } catch (error: any) {
+      throw new Error(error.message || 'Registration failed');
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('venueflow-token');
-    localStorage.removeItem('venueflow-user');
-    setToken(null);
-    setUser(null);
+    signOut(auth);
     setBootstrap(null);
     setActiveHold(null);
     setAuthChecked(true);
@@ -268,15 +276,15 @@ function App() {
   };
 
   const refreshUserData = async () => {
-    if (!token || !user || user.role !== 'user') return;
-    const data = await request<BootstrapPayload>('/bootstrap', token);
+    if (!firebaseUser || !user || user.role !== 'user') return;
+    const data = await request<BootstrapPayload>('/bootstrap');
     setBootstrap(data);
     setGuidance(data.guidance);
   };
 
   const lockSeats = async (seatIds: string[]) => {
-    if (!token) return;
-    const result = await request<{ guidance: Guidance; hold: Hold }>('/bookings/lock', token, {
+    if (!firebaseUser) return;
+    const result = await request<{ guidance: Guidance; hold: Hold }>('/bookings/lock', {
       method: 'POST',
       body: JSON.stringify({ seatIds }),
     });
@@ -286,8 +294,8 @@ function App() {
   };
 
   const releaseHold = async () => {
-    if (!token || !activeHold) return;
-    await request('/bookings/release', token, {
+    if (!firebaseUser || !activeHold) return;
+    await request('/bookings/release', {
       method: 'POST',
       body: JSON.stringify({ holdId: activeHold.id }),
     });
@@ -296,8 +304,8 @@ function App() {
   };
 
   const confirmPayment = async () => {
-    if (!token || !activeHold) return;
-    const result = await request<{ booking: Booking; guidance: Guidance }>('/payments/checkout', token, {
+    if (!firebaseUser || !activeHold) return;
+    const result = await request<{ booking: Booking; guidance: Guidance }>('/payments/checkout', {
       method: 'POST',
       body: JSON.stringify({ holdId: activeHold.id }),
     });
@@ -309,9 +317,9 @@ function App() {
   };
 
   const placeOrder = async (cart: CartItem) => {
-    if (!token || !latestBooking || !bootstrap) return;
+    if (!firebaseUser || !latestBooking || !bootstrap) return;
     const items = Object.entries(cart).map(([itemId, quantity]) => ({ itemId, quantity }));
-    const result = await request<{ order: Order }>('/orders', token, {
+    const result = await request<{ order: Order }>('/orders', {
       method: 'POST',
       body: JSON.stringify({ bookingId: latestBooking.id, items }),
     });
@@ -320,28 +328,28 @@ function App() {
   };
 
   const updateVendorOrder = async (orderId: string, status: string) => {
-    if (!token) return;
-    await request(`/vendor/orders/${orderId}/status`, token, {
+    if (!firebaseUser) return;
+    await request(`/vendor/orders/${orderId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
   };
 
   const loadAdmin = async () => {
-    if (!token || user?.role !== 'admin') return;
-    const result = await request<DashboardPayload>('/admin/dashboard', token);
+    if (!firebaseUser || user?.role !== 'admin') return;
+    const result = await request<DashboardPayload>('/admin/dashboard');
     setAdminSnapshot(result);
   };
 
   useEffect(() => {
-    if (token && user?.role === 'admin') {
+    if (firebaseUser && user?.role === 'admin') {
       loadAdmin().catch((error: Error) => setStatusMessage(error.message));
     }
-  }, [token, user]);
+  }, [firebaseUser, user]);
 
   const updateZoneMapper = async (zoneId: string, gate: string, parkingZone: string) => {
-    if (!token) return;
-    const result = await request<{ zones: Zone[] }>(`/admin/zones/${zoneId}`, token, {
+    if (!firebaseUser) return;
+    const result = await request<{ zones: Zone[] }>(`/admin/zones/${zoneId}`, {
       method: 'PATCH',
       body: JSON.stringify({ gate, parkingZone }),
     });
@@ -357,8 +365,8 @@ function App() {
   };
 
   const simulateHeatmap = async (zoneId: string, delta: number) => {
-    if (!token) return;
-    const result = await request<{ zones: Zone[] }>('/admin/heatmap-event', token, {
+    if (!firebaseUser) return;
+    const result = await request<{ zones: Zone[] }>('/admin/heatmap-event', {
       method: 'POST',
       body: JSON.stringify({ zoneId, delta }),
     });
@@ -411,7 +419,7 @@ function App() {
         <Route
           path="/events"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <EventsPage bootstrap={bootstrap} />
               </PlatformLayout>
@@ -421,7 +429,7 @@ function App() {
         <Route
           path="/venue-map"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <VenueMapPage
                   bootstrap={bootstrap}
@@ -440,7 +448,7 @@ function App() {
         <Route
           path="/order-food"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <OrderFoodPage bootstrap={bootstrap} latestBooking={latestBooking} placeOrder={placeOrder} />
               </PlatformLayout>
@@ -450,7 +458,7 @@ function App() {
         <Route
           path="/my-orders"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['user']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['user']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <MyOrdersPage bootstrap={bootstrap} latestBooking={latestBooking} />
               </PlatformLayout>
@@ -460,9 +468,9 @@ function App() {
         <Route
           path="/vendor/dashboard"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['vendor']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['vendor']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
-                <VendorDashboardPage token={token} updateOrder={updateVendorOrder} />
+                <VendorDashboardPage firebaseUser={firebaseUser} updateOrder={updateVendorOrder} />
               </PlatformLayout>
             </ProtectedRoute>
           }
@@ -470,7 +478,7 @@ function App() {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute token={token} authChecked={authChecked} user={user} allow={['admin']}>
+            <ProtectedRoute firebaseUser={firebaseUser} authChecked={authChecked} user={user} allow={['admin']}>
               <PlatformLayout user={user} logout={logout} statusMessage={statusMessage} location={location.pathname}>
                 <AdminDashboardPage
                   snapshot={adminSnapshot}
@@ -491,17 +499,17 @@ function ProtectedRoute({
   allow,
   authChecked,
   children,
-  token,
+  firebaseUser,
   user,
 }: {
   allow: Role[];
   authChecked: boolean;
   children: ReactElement;
-  token: string | null;
+  firebaseUser: User | null;
   user: AppUser | null;
 }) {
   if (!authChecked) return <LoadingPanel label="Checking session..." />;
-  if (!token || !user) return <Navigate to="/login" replace />;
+  if (!firebaseUser || !user) return <Navigate to="/login" replace />;
   if (!allow.includes(user.role)) return <Navigate to={roleHome(user.role)} replace />;
   return children;
 }
@@ -1576,16 +1584,16 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
   );
 }
 
-function VendorDashboardPage({ token, updateOrder }: { token: string | null; updateOrder: (orderId: string, status: string) => Promise<void> }) {
+function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User | null; updateOrder: (orderId: string, status: string) => Promise<void> }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<string>('all');
   
   useEffect(() => {
-    if (!token) return;
-    request<{ orders: Order[] }>('/vendor/orders', token)
+    if (!firebaseUser) return;
+    request<{ orders: Order[] }>('/vendor/orders')
       .then((data) => setOrders(data.orders))
       .catch(() => undefined);
-  }, [token]);
+  }, [firebaseUser]);
 
   const filteredOrders = orders.filter(order => filter === 'all' || order.status === filter);
   const stats = {

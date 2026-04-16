@@ -15,8 +15,18 @@ import { sendBookingEmail } from './services/emailService.js';
 import { connectMongo } from './db/connect.js';
 import { ensureSeeded } from './db/seed.js';
 import { Booking, Event, Hold, MenuItem, Notification, Order, Seat, User, Zone } from './db/models/index.js';
+import admin from 'firebase-admin';
 
 dotenv.config();
+
+const firebaseConfig = {
+  projectId: "promptwars-f22dc",
+};
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  ...firebaseConfig,
+});
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'venueflow-dev-secret';
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
@@ -34,16 +44,30 @@ function pickUser(user) {
 }
 
 function auth(requiredRoles = []) {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const header = req.headers.authorization;
     if (!header?.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Missing authorization token' });
     }
 
     try {
-      const payload = jwt.verify(header.slice(7), JWT_SECRET);
-      req.user = payload;
-      if (requiredRoles.length && !requiredRoles.includes(payload.role)) {
+      const idToken = header.slice(7);
+      let user;
+      try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        user = {
+          id: decodedToken.uid,
+          email: decodedToken.email,
+          name: decodedToken.name || decodedToken.email.split('@')[0],
+          role: 'user'
+        };
+      } catch (firebaseError) {
+        // Fallback to JWT for local development
+        const payload = jwt.verify(idToken, JWT_SECRET);
+        user = payload;
+      }
+      req.user = user;
+      if (requiredRoles.length && !requiredRoles.includes(req.user.role)) {
         return res.status(403).json({ message: 'Forbidden' });
       }
       next();
