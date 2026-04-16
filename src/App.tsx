@@ -52,8 +52,16 @@ type DashboardPayload = { bookings: Booking[]; holds: Hold[]; mapper: { gate: st
 type CartItem = Record<string, number>;
 type AuthPayload = { email: string; name: string; password: string; role: Role };
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:5000';
+const defaultOrigin = import.meta.env.VITE_API_URL
+  ? undefined
+  : import.meta.env.DEV
+  ? 'http://localhost:5000'
+  : typeof window !== 'undefined'
+  ? window.location.origin
+  : 'http://localhost:5000';
+
+const API_URL = import.meta.env.VITE_API_URL ?? `${defaultOrigin}/api`;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? defaultOrigin;
 
 async function request<T>(path: string, token?: string | null, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
