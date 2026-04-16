@@ -36,3 +36,16 @@ input,
 select {
   font: inherit;
 }
+
+/* Shrink the reCAPTCHA Enterprise badge so it appears smaller on screen */
+.grecaptcha-badge {
+  transform: scale(0.75);
+  transform-origin: bottom right;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.grecaptcha-badge iframe {
+  width: 100% !important;
+  height: auto !important;
+}
