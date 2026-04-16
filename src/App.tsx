@@ -40,16 +40,20 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-r
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User, updateProfile } from 'firebase/auth';
 
-// Firebase config - REPLACE WITH YOUR FIREBASE CONFIG FROM CONSOLE
+// Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDw-B67Kh5PkLxuS5XTJDiwkXtzbpLS4Sw",
-  authDomain: "promptwars-f22dc.firebaseapp.com",
-  projectId: "promptwars-f22dc",
-  storageBucket: "promptwars-f22dc.firebasestorage.app",
-  messagingSenderId: "720960866733",
-  appId: "1:720960866733:web:420f41a9862db63f837924",
-  measurementId: "G-MBTKBQPMJ8"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || !firebaseConfig.storageBucket || !firebaseConfig.messagingSenderId || !firebaseConfig.appId) {
+  throw new Error('Firebase configuration is missing. Add VITE_FIREBASE_* variables to your .env file.');
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
