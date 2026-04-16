@@ -2,72 +2,37 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactElement } from 
 import { io } from 'socket.io-client';
 import {
   Activity,
-  Armchair,
+  AlertCircle,
   ArrowRight,
   Bell,
+  Calendar,
   Car,
   CheckCircle2,
-  Clock3,
-  Coffee,
-  Search,
-  LogOut,
-  MapPin,
-  ShieldCheck,
-  ShoppingCart,
-  Ticket,
-  Users,
-  UtensilsCrossed,
-  Warehouse,
-  Waves,
-  Star,
-  TrendingUp,
-  Calendar,
-  CreditCard,
-  Smartphone,
-  Zap,
   ChevronRight,
-  Menu,
-  X,
-  Gift,
-  Sparkles,
-  Flame,
+  Coffee,
   Crown,
-  Gem,
-  Heart,
-  Share2,
-  MoreHorizontal,
-  Phone,
-  Mail,
-  Map,
-  Navigation,
-  Wifi,
-  Battery,
-  Signal,
-  Sun,
-  Moon,
-  Cloud,
-  Thermometer,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  Maximize,
-  Minimize,
-  Settings,
-  HelpCircle,
-  MessageCircle,
-  UserPlus,
-  UserCheck,
-  UserX,
   Eye,
   EyeOff,
-  Lock,
-  Unlock,
-  AlertCircle,
+  Flame,
   Info,
-  Check,
-  XCircle,
-  Loader2
+  Loader2,
+  Lock,
+  LogOut,
+  Mail,
+  Map as MapIcon,
+  MapPin,
+  Menu,
+  Navigation,
+  Search,
+  Settings,
+  ShoppingCart,
+  Sparkles,
+  Ticket,
+  UserPlus,
+  Users,
+  Waves,
+  Warehouse,
+  X,
 } from 'lucide-react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -775,7 +740,7 @@ function PlatformLayout({
   
   const navItems = [
     { href: '/events', label: 'Events', icon: Calendar },
-    { href: '/venue-map', label: 'Venue Map', icon: Map },
+    { href: '/venue-map', label: 'Venue Map', icon: MapIcon },
     { href: '/order-food', label: 'Order Food', icon: Coffee },
     { href: '/my-orders', label: 'My Orders', icon: ShoppingCart }
   ];
@@ -1098,21 +1063,6 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
           <p className="text-purple-200">No events match your search criteria.</p>
         </div>
       )}
-    </div>
-  );
-}
-
-function FeatureCard({ icon: Icon, subtitle, title }: { icon: typeof Ticket; subtitle: string; title: string }) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm p-6 hover:bg-white/20 transition-all transform hover:-translate-y-1">
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all"></div>
-      <div className="relative">
-        <div className="mb-4 inline-flex p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
-          <Icon className="text-white" size={20} />
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-        <p className="text-purple-200 text-sm">{subtitle}</p>
-      </div>
     </div>
   );
 }
@@ -1875,7 +1825,7 @@ function SeatGrid({
               key={seat.id}
               onClick={() => onToggle(seat.id)}
               disabled={isDisabled}
-              className={`p-3 rounded-xl border ${borderColor} ${bgColor} transition-all text-left ${!isDisabled && !isSelected ? 'hover:scale-105' : ''} disabled:cursor-not-allowed`}
+              className={`p-3 rounded-xl border ${borderColor} ${bgColor} ${textColor} transition-all text-left ${!isDisabled && !isSelected ? 'hover:scale-105' : ''} disabled:cursor-not-allowed`}
             >
               <div className="text-xs font-mono">{seat.row}{seat.number}</div>
               <div className="text-xs mt-1">₹{seat.price}</div>
