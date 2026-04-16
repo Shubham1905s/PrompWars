@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
-
+import express from 'express';
+import cors from 'cors';
 export function createSocketServer(httpServer, { corsOrigin = '*' } = {}) {
   // const origin =
   //   typeof corsOrigin === 'function'
@@ -20,6 +21,13 @@ export function createSocketServer(httpServer, { corsOrigin = '*' } = {}) {
     },
   });
 }
+const app = express();
+app.use(cors({
+  origin: 'https://vercel.app',
+  methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
 export function registerSocketHandlers(io, { state, seatLockService, heatmapService }) {
   io.on('connection', (socket) => {
