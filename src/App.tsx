@@ -40,7 +40,7 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-r
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User, updateProfile } from 'firebase/auth';
 
-// Firebase config
+// Firebase config - REPLACE WITH YOUR FIREBASE CONFIG FROM CONSOLE
 const firebaseConfig = {
   apiKey: "AIzaSyDw-B67Kh5PkLxuS5XTJDiwkXtzbpLS4Sw",
   authDomain: "promptwars-f22dc.firebaseapp.com",
@@ -75,8 +75,8 @@ const productionBackend = 'https://prompwars.onrender.com';
 const defaultOrigin = import.meta.env.VITE_API_URL
   ? undefined
   : import.meta.env.DEV
-  ? 'http://localhost:5000'
-  : productionBackend;
+    ? 'http://localhost:5000'
+    : productionBackend;
 
 const API_URL = import.meta.env.VITE_API_URL ?? `${defaultOrigin}/api`;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? defaultOrigin;
@@ -180,13 +180,13 @@ function App() {
         setBootstrap((current) =>
           current
             ? {
-                ...current,
-                seats: current.seats.map((seat) =>
-                  seatIds.includes(seat.id)
-                    ? { ...seat, status: 'locked', lockedBy: lockingUserId, holdExpiresAt: expiresAt }
-                    : seat,
-                ),
-              }
+              ...current,
+              seats: current.seats.map((seat) =>
+                seatIds.includes(seat.id)
+                  ? { ...seat, status: 'locked', lockedBy: lockingUserId, holdExpiresAt: expiresAt }
+                  : seat,
+              ),
+            }
             : current,
         );
       });
@@ -194,13 +194,13 @@ function App() {
         setBootstrap((current) =>
           current
             ? {
-                ...current,
-                seats: current.seats.map((seat) =>
-                  seatIds.includes(seat.id)
-                    ? { ...seat, status: 'available', lockedBy: null, holdExpiresAt: null }
-                    : seat,
-                ),
-              }
+              ...current,
+              seats: current.seats.map((seat) =>
+                seatIds.includes(seat.id)
+                  ? { ...seat, status: 'available', lockedBy: null, holdExpiresAt: null }
+                  : seat,
+              ),
+            }
             : current,
         );
       });
@@ -208,13 +208,13 @@ function App() {
         setBootstrap((current) =>
           current
             ? {
-                ...current,
-                seats: current.seats.map((seat) =>
-                  seatIds.includes(seat.id)
-                    ? { ...seat, status: 'booked', lockedBy: null, holdExpiresAt: null }
-                    : seat,
-                ),
-              }
+              ...current,
+              seats: current.seats.map((seat) =>
+                seatIds.includes(seat.id)
+                  ? { ...seat, status: 'booked', lockedBy: null, holdExpiresAt: null }
+                  : seat,
+              ),
+            }
             : current,
         );
       });
@@ -226,9 +226,9 @@ function App() {
         setBootstrap((current) =>
           current
             ? {
-                ...current,
-                orders: current.orders.map((order) => (order.id === orderId ? { ...order, status } : order)),
-              }
+              ...current,
+              orders: current.orders.map((order) => (order.id === orderId ? { ...order, status } : order)),
+            }
             : current,
         );
       });
@@ -356,10 +356,10 @@ function App() {
     setAdminSnapshot((current) =>
       current
         ? {
-            ...current,
-            zones: result.zones,
-            mapper: current.mapper.map((item) => (item.id === zoneId ? { ...item, gate, parkingZone } : item)),
-          }
+          ...current,
+          zones: result.zones,
+          mapper: current.mapper.map((item) => (item.id === zoneId ? { ...item, gate, parkingZone } : item)),
+        }
         : current,
     );
   };
@@ -555,13 +555,13 @@ function AuthPage({
                 <Waves className="text-purple-300" size={20} />
                 <span className="text-sm font-semibold text-purple-100">Premium Venue Experience</span>
               </div>
-              
+
               <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                 Where Every
                 <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> Moment </span>
                 Matters
               </h1>
-              
+
               <p className="text-xl text-purple-100 mb-8 leading-relaxed">
                 Experience seamless event booking, real-time seat selection, and premium in-venue services all in one platform.
               </p>
@@ -589,7 +589,7 @@ function AuthPage({
 
               <div className="flex items-center gap-4 text-sm text-purple-200">
                 <div className="flex -space-x-2">
-                  {[1,2,3,4].map((i) => (
+                  {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white/20 flex items-center justify-center text-xs font-bold">
                       {String.fromCharCode(64 + i)}
                     </div>
@@ -607,8 +607,8 @@ function AuthPage({
                   {mode === 'login' ? 'Welcome Back' : 'Join the Experience'}
                 </h2>
                 <p className="text-purple-200">
-                  {mode === 'login' 
-                    ? 'Sign in to access your personalized venue experience' 
+                  {mode === 'login'
+                    ? 'Sign in to access your personalized venue experience'
                     : 'Create your account and get exclusive access'}
                 </p>
               </div>
@@ -752,25 +752,25 @@ function PlatformLayout({
   user: AppUser | null;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const navItems = [
     { href: '/events', label: 'Events', icon: Calendar },
     { href: '/venue-map', label: 'Venue Map', icon: MapIcon },
     { href: '/order-food', label: 'Order Food', icon: Coffee },
     { href: '/my-orders', label: 'My Orders', icon: ShoppingCart }
   ];
-  
+
   const vendorItems = [
     { href: '/vendor/dashboard', label: 'Vendor Dashboard', icon: Warehouse }
   ];
-  
+
   const adminItems = [
     { href: '/admin/dashboard', label: 'Admin Dashboard', icon: Settings }
   ];
-  
-  const navigationItems = user?.role === 'vendor' ? vendorItems : 
-                         user?.role === 'admin' ? adminItems : 
-                         navItems;
+
+  const navigationItems = user?.role === 'vendor' ? vendorItems :
+    user?.role === 'admin' ? adminItems :
+      navItems;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -804,11 +804,10 @@ function PlatformLayout({
                     <Link
                       key={item.href}
                       to={item.href}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-                        isActive
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${isActive
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                           : 'text-purple-100 hover:bg-white/10'
-                      }`}
+                        }`}
                     >
                       <Icon size={16} />
                       <span>{item.label}</span>
@@ -826,7 +825,7 @@ function PlatformLayout({
                   </div>
                   <span className="text-sm font-medium text-white">{user?.name}</span>
                 </div>
-                
+
                 <button
                   onClick={logout}
                   className="p-2 rounded-xl bg-white/10 text-purple-100 hover:bg-white/20 transition-all"
@@ -853,11 +852,10 @@ function PlatformLayout({
                       key={item.href}
                       to={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
-                        isActive
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                           : 'text-purple-100 hover:bg-white/10'
-                      }`}
+                        }`}
                     >
                       <Icon size={18} />
                       <span>{item.label}</span>
@@ -900,21 +898,21 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
   const [activeSport, setActiveSport] = useState<string>('All');
   const navigate = useNavigate();
   const now = Date.now();
-  
+
   const featuredFromBootstrap = bootstrap
     ? {
-        id: 'event-1',
-        sport: 'Cricket',
-        name: bootstrap.event.name,
-        venue: bootstrap.event.venue,
-        startsAt: bootstrap.event.startsAt,
-        endsAt: bootstrap.event.endsAt,
-        image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067',
-        price: '₹2,499',
-        tickets: 1243,
-      }
+      id: 'event-1',
+      sport: 'Cricket',
+      name: bootstrap.event.name,
+      venue: bootstrap.event.venue,
+      startsAt: bootstrap.event.startsAt,
+      endsAt: bootstrap.event.endsAt,
+      image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067',
+      price: '₹2,499',
+      tickets: 1243,
+    }
     : null;
-    
+
   const sampleEvents = [
     ...(featuredFromBootstrap ? [featuredFromBootstrap] : []),
     { id: 'event-2', sport: 'Football', name: 'Champions League Final', venue: 'City Stadium', startsAt: new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070', price: '₹3,999', tickets: 2341 },
@@ -955,8 +953,8 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
       {featuredEvent && (
         <div className="relative rounded-2xl overflow-hidden group cursor-pointer" onClick={handleGetTickets}>
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10"></div>
-          <img 
-            src={featuredEvent.image} 
+          <img
+            src={featuredEvent.image}
             alt={featuredEvent.name}
             className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
           />
@@ -1005,11 +1003,10 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
               <button
                 key={sport}
                 onClick={() => setActiveSport(sport)}
-                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-                  activeSport === sport
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${activeSport === sport
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                     : 'bg-white/10 text-purple-100 hover:bg-white/20'
-                }`}
+                  }`}
               >
                 {sport}
               </button>
@@ -1026,8 +1023,8 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
             onClick={() => navigate('/venue-map')}
           >
             <div className="relative h-48 overflow-hidden">
-              <img 
-                src={event.image} 
+              <img
+                src={event.image}
                 alt={event.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -1035,7 +1032,7 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
                 {event.sport}
               </div>
             </div>
-            
+
             <div className="p-5">
               <h3 className="text-xl font-bold text-white mb-2">{event.name}</h3>
               <div className="flex items-center gap-2 text-purple-200 text-sm mb-3">
@@ -1046,7 +1043,7 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
                 <Calendar size={14} />
                 <span>{new Date(event.startsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
               </div>
-              
+
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-2xl font-bold text-white">{event.price}</p>
@@ -1057,7 +1054,7 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
                   <span className="text-sm">{event.tickets} tickets</span>
                 </div>
               </div>
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1177,11 +1174,10 @@ function VenueMapPage({
                     <button
                       key={section}
                       onClick={() => setSelectedSection(section)}
-                      className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-                        selectedSection === section
+                      className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${selectedSection === section
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                           : 'bg-white/10 text-purple-100 hover:bg-white/20'
-                      }`}
+                        }`}
                     >
                       {section}
                     </button>
@@ -1211,9 +1207,8 @@ function VenueMapPage({
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-white">Checkout</h3>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  activeHold ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${activeHold ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
+                  }`}>
                   {activeHold ? 'Hold Active' : 'Select Seats'}
                 </span>
               </div>
@@ -1323,7 +1318,7 @@ function VenueMapPage({
                 <h3 className="text-xl font-bold text-white mb-2">Booking Confirmed!</h3>
                 <p className="text-purple-200">Your seats have been successfully booked.</p>
               </div>
-              
+
               <div className="bg-white/5 rounded-xl p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-purple-300">Booking ID:</span>
@@ -1383,7 +1378,7 @@ function OrderFoodPage({
   const [cart, setCart] = useState<CartItem>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const navigate = useNavigate();
-  
+
   if (!bootstrap) return <LoadingPanel label="Loading menu..." />;
 
   const categories = useMemo(() => {
@@ -1431,11 +1426,10 @@ function OrderFoodPage({
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-                selectedCategory === category
+              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${selectedCategory === category
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                   : 'bg-white/10 text-purple-100 hover:bg-white/20'
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -1531,13 +1525,13 @@ function OrderFoodPage({
 
 function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayload | null; latestBooking: Booking | null }) {
   if (!bootstrap) return <LoadingPanel label="Loading orders..." />;
-  
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
       <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
         <h2 className="text-2xl font-bold text-white mb-2">My Orders</h2>
         <p className="text-purple-200 mb-6">Track your food orders and bookings</p>
-        
+
         <div className="space-y-4">
           {bootstrap.orders.length > 0 ? (
             bootstrap.orders.map((order) => (
@@ -1547,11 +1541,10 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
                     <p className="text-sm font-mono text-purple-300">{order.id.slice(0, 8)}</p>
                     <h3 className="font-semibold text-white">Seat {order.seatId}</h3>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    order.status === 'delivered' ? 'bg-green-500/20 text-green-300' :
-                    order.status === 'preparing' ? 'bg-yellow-500/20 text-yellow-300' :
-                    'bg-purple-500/20 text-purple-300'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.status === 'delivered' ? 'bg-green-500/20 text-green-300' :
+                      order.status === 'preparing' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-purple-500/20 text-purple-300'
+                    }`}>
                     {order.status}
                   </span>
                 </div>
@@ -1575,7 +1568,7 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
           )}
         </div>
       </div>
-      
+
       <div className="space-y-6">
         <LatestBookingCard booking={latestBooking} />
         <NotificationsPanel notifications={bootstrap.notifications} />
@@ -1587,7 +1580,7 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
 function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User | null; updateOrder: (orderId: string, status: string) => Promise<void> }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<string>('all');
-  
+
   useEffect(() => {
     if (!firebaseUser) return;
     request<{ orders: Order[] }>('/vendor/orders')
@@ -1632,11 +1625,10 @@ function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-xl capitalize transition-all ${
-                  filter === status
+                className={`px-4 py-2 rounded-xl capitalize transition-all ${filter === status
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                     : 'bg-white/10 text-purple-100 hover:bg-white/20'
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -1657,17 +1649,16 @@ function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User
                     {order.items.length} items • ₹{order.total}
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   {['accepted', 'preparing', 'ready', 'delivered', 'rejected'].map((status) => (
                     <button
                       key={status}
                       onClick={() => updateOrder(order.id, status)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        order.status === status
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${order.status === status
                           ? 'bg-purple-500 text-white'
                           : 'bg-white/10 text-purple-100 hover:bg-white/20'
-                      }`}
+                        }`}
                     >
                       {status}
                     </button>
@@ -1676,7 +1667,7 @@ function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User
               </div>
             </div>
           ))}
-          
+
           {filteredOrders.length === 0 && (
             <div className="text-center py-12">
               <p className="text-purple-200">No orders found</p>
@@ -1738,7 +1729,7 @@ function AdminDashboardPage({
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <HeatmapPanel zones={snapshot.zones} guidance={null} />
-        
+
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
           <h3 className="text-xl font-bold text-white mb-4">Zone Management</h3>
           <div className="space-y-3">
@@ -1797,7 +1788,7 @@ function SeatGrid({
 }) {
   const availableCount = useMemo(() => seats.filter((seat) => seat.status === 'available').length, [seats]);
   const bookedCount = useMemo(() => seats.filter((seat) => seat.status === 'booked').length, [seats]);
-  
+
   return (
     <div className="bg-white/5 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
@@ -1816,11 +1807,11 @@ function SeatGrid({
           const isBooked = seat.status === 'booked';
           const isLocked = seat.status === 'locked' && !isSelected;
           const isDisabled = isBooked || isLocked || !!activeHold;
-          
+
           let bgColor = 'bg-white/5 hover:bg-white/10';
           let borderColor = 'border-white/10';
           let textColor = 'text-white';
-          
+
           if (isSelected) {
             bgColor = 'bg-gradient-to-r from-purple-500 to-pink-500';
             borderColor = 'border-purple-400';
@@ -1834,7 +1825,7 @@ function SeatGrid({
             borderColor = 'border-yellow-500/30';
             textColor = 'text-yellow-300';
           }
-          
+
           return (
             <button
               key={seat.id}
@@ -1859,14 +1850,14 @@ function HeatmapPanel({ zones, guidance }: { zones: Zone[]; guidance: Guidance |
         <h3 className="text-xl font-bold text-white">Live Crowd Density</h3>
         <Activity className="text-purple-300" size={20} />
       </div>
-      
+
       <div className="space-y-4">
         {zones.map((zone) => {
-          const densityClass = zone.score > 0.7 ? 'from-red-500 to-orange-500' : 
-                               zone.score > 0.4 ? 'from-yellow-500 to-orange-500' : 
-                               'from-green-500 to-emerald-500';
+          const densityClass = zone.score > 0.7 ? 'from-red-500 to-orange-500' :
+            zone.score > 0.4 ? 'from-yellow-500 to-orange-500' :
+              'from-green-500 to-emerald-500';
           const densityText = zone.score > 0.7 ? 'High' : zone.score > 0.4 ? 'Medium' : 'Low';
-          
+
           return (
             <div key={zone.id} className="bg-white/5 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
@@ -1875,28 +1866,27 @@ function HeatmapPanel({ zones, guidance }: { zones: Zone[]; guidance: Guidance |
                   <p className="text-xs text-purple-300">{zone.type}</p>
                 </div>
                 <div className="text-right">
-                  <div className={`text-sm font-semibold ${
-                    zone.score > 0.7 ? 'text-red-300' : zone.score > 0.4 ? 'text-yellow-300' : 'text-green-300'
-                  }`}>
+                  <div className={`text-sm font-semibold ${zone.score > 0.7 ? 'text-red-300' : zone.score > 0.4 ? 'text-yellow-300' : 'text-green-300'
+                    }`}>
                     {densityText} Density
                   </div>
                   <div className="text-xs text-purple-300">{zone.waitTime} min wait</div>
                 </div>
               </div>
-              
+
               <div className="mb-2">
                 <div className="flex justify-between text-xs text-purple-300 mb-1">
                   <span>Occupancy</span>
                   <span>{zone.occupancy}/{zone.capacity}</span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full bg-gradient-to-r ${densityClass} rounded-full transition-all duration-500`}
                     style={{ width: `${(zone.occupancy / zone.capacity) * 100}%` }}
                   ></div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <MapPin size={12} className="text-purple-300" />
@@ -1911,7 +1901,7 @@ function HeatmapPanel({ zones, guidance }: { zones: Zone[]; guidance: Guidance |
           );
         })}
       </div>
-      
+
       {guidance && (
         <div className="mt-4 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
           <div className="flex items-start gap-3">
@@ -1934,7 +1924,7 @@ function NotificationsPanel({ notifications }: { notifications: Notification[] }
         <Bell className="text-purple-300" size={20} />
         <h3 className="text-xl font-bold text-white">Notifications</h3>
       </div>
-      
+
       <div className="space-y-3 max-h-[300px] overflow-y-auto">
         {notifications.length > 0 ? (
           notifications.map((item) => (
@@ -1978,7 +1968,7 @@ function LatestBookingCard({ booking }: { booking: Booking | null }) {
         <CheckCircle2 className="text-green-400" size={20} />
         <h3 className="text-xl font-bold text-white">Latest Booking</h3>
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex justify-between items-center py-2 border-b border-white/10">
           <span className="text-purple-300">Seats</span>
