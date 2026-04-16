@@ -11,6 +11,7 @@ import { createSeedState } from './data/seedData.js';
 import { createSeatLockService } from './services/seatLockService.js';
 import { createHeatmapService } from './services/heatmapService.js';
 import { createSocketServer, registerSocketHandlers } from './realtime/socket.js';
+import { sendBookingEmail } from './services/emailService.js';
 import { connectMongo } from './db/connect.js';
 import { ensureSeeded } from './db/seed.js';
 import { Booking, Event, Hold, MenuItem, Notification, Order, Seat, User, Zone } from './db/models/index.js';
@@ -76,6 +77,34 @@ function createGuidance(heatmapService, seat) {
     recommendedGate: bestGate?.gate ?? seat?.gate ?? 'Gate A',
     recommendedParking: bestGate?.parkingZone ?? seat?.parkingZone ?? 'P1',
     message: `Use ${bestGate?.gate ?? seat?.gate ?? 'Gate A'} and park in ${bestGate?.parkingZone ?? seat?.parkingZone ?? 'P1'} for the fastest arrival.`,
+  };
+}
+
+async function getUserEmail({ mongoEnabled, state, userId }) {
+  if (mongoEnabled) {
+    const user = await User.findOne({ id: userId }).lean();
+    return user?.email ?? null;
+  }
+  const user = state.demoUsers.find((item) => item.id === userId);
+  return user?.email ?? null;
+}
+
+async function getEventInfo({ mongoEnabled, state }) {
+  if (mongoEnabled) {
+    const event = await Event.findOne({}).sort({ startsAt: 1 }).lean();
+    if (!event) return null;
+    return {
+      name: event.name,
+      venue: event.venue,
+      startsAt: event.startsAt,
+      endsAt: event.endsAt,
+    };
+  }
+  return {
+    name: state.currentEvent.name,
+    venue: state.currentEvent.venue,
+    startsAt: state.currentEvent.startsAt,
+    endsAt: state.currentEvent.endsAt,
   };
 }
 
@@ -407,7 +436,20 @@ export async function createPlatformServer({ disableIntervals = false } = {}) {
       await Notification.create(notice);
       const zones = await Zone.find({}).lean();
       const dbHeatmapService = createHeatmapService({ state: { zones }, io: null });
-      return res.json({ booking, guidance: createGuidance(dbHeatmapService, heldSeats[0] ?? null) });
+      const guidance = createGuidance(dbHeatmapService, heldSeats[0] ?? null);
+
+      // Best-effort receipt email (do not block response).
+      getUserEmail({ mongoEnabled: true, state, userId: req.user.id })
+        .then(async (email) => {
+          if (!email) return;
+          const eventInfo = await getEventInfo({ mongoEnabled: true, state });
+          if (!eventInfo) return;
+          const arriveAt = new Date(new Date(eventInfo.startsAt).getTime() - 45 * 60 * 1000);
+          await sendBookingEmail({ to: email, booking, event: eventInfo, guidance, arriveAt });
+        })
+        .catch(() => undefined);
+
+      return res.json({ booking, guidance });
     }
 
     state.bookings.push(booking);
@@ -418,7 +460,19 @@ export async function createPlatformServer({ disableIntervals = false } = {}) {
     await seatLockService.releaseSeats({ eventId: hold.eventId, seatIds: hold.seatIds, userId: req.user.id });
     io.emit('seat:confirmed', { seatIds: hold.seatIds, bookingId: booking.id, userId: req.user.id });
     createNotification(state, req.user.id, `Booking ${booking.id.slice(0, 8)} confirmed. Gate ${booking.gate}.`, 'success');
-    return res.json({ booking, guidance: createGuidance(heatmapService, heldSeats[0]) });
+    const guidance = createGuidance(heatmapService, heldSeats[0]);
+
+    getUserEmail({ mongoEnabled: false, state, userId: req.user.id })
+      .then(async (email) => {
+        if (!email) return;
+        const eventInfo = await getEventInfo({ mongoEnabled: false, state });
+        if (!eventInfo) return;
+        const arriveAt = new Date(new Date(eventInfo.startsAt).getTime() - 45 * 60 * 1000);
+        await sendBookingEmail({ to: email, booking, event: eventInfo, guidance, arriveAt });
+      })
+      .catch(() => undefined);
+
+    return res.json({ booking, guidance });
   });
 
   app.get('/api/bookings/me', auth(), (req, res) => {

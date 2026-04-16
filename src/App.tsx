@@ -19,6 +19,55 @@ import {
   UtensilsCrossed,
   Warehouse,
   Waves,
+  Star,
+  TrendingUp,
+  Calendar,
+  CreditCard,
+  Smartphone,
+  Zap,
+  ChevronRight,
+  Menu,
+  X,
+  Gift,
+  Sparkles,
+  Flame,
+  Crown,
+  Gem,
+  Heart,
+  Share2,
+  MoreHorizontal,
+  Phone,
+  Mail,
+  Map,
+  Navigation,
+  Wifi,
+  Battery,
+  Signal,
+  Sun,
+  Moon,
+  Cloud,
+  Thermometer,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Maximize,
+  Minimize,
+  Settings,
+  HelpCircle,
+  MessageCircle,
+  UserPlus,
+  UserCheck,
+  UserX,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  AlertCircle,
+  Info,
+  Check,
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -345,7 +394,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-ink text-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <Routes>
         <Route
           path="/"
@@ -494,6 +543,7 @@ function AuthPage({
 }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: '', name: '', password: '', role: 'user' as Role });
 
   const submit = async (event: FormEvent) => {
@@ -510,71 +560,199 @@ function AuthPage({
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-10">
-      <div className="grid w-full gap-6 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glow backdrop-blur xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-[28px] bg-gradient-to-br from-sky-500/20 to-emerald-500/15 p-8">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-sky-100">
-            <Waves size={16} /> Full-stack venue operations MVP
-          </p>
-          <h1 className="max-w-xl text-4xl font-bold leading-tight text-white md:text-5xl">
-            Real-time event experience platform for large-scale sports venues.
-          </h1>
-          <p className="mt-5 max-w-2xl text-base text-slate-200/80">
-            Seat locking, heatmap-driven routing, wait times, food ordering, vendor operations, and
-            admin coordination in one connected system.
-          </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <FeatureCard icon={Ticket} title="Seat locking" subtitle="10-minute checkout holds and no double booking." />
-            <FeatureCard icon={Activity} title="Heatmap" subtitle="Live density, wait times, and gate recommendations." />
-            <FeatureCard icon={UtensilsCrossed} title="In-seat orders" subtitle="Vendor dashboard and live order status." />
-            <FeatureCard icon={Car} title="Parking flow" subtitle="Arrival guidance and pre-exit parking notifications." />
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070')] bg-cover bg-center opacity-10"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+      </div>
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center justify-center px-6 py-10">
+        <div className="grid w-full gap-8 rounded-3xl bg-white/10 backdrop-blur-xl shadow-2xl overflow-hidden xl:grid-cols-[1.2fr_0.8fr] border border-white/20">
+          <div className="relative p-8 lg:p-12 bg-gradient-to-br from-purple-600/20 to-pink-600/20">
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-3 mb-6 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
+                <Waves className="text-purple-300" size={20} />
+                <span className="text-sm font-semibold text-purple-100">Premium Venue Experience</span>
+              </div>
+              
+              <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                Where Every
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> Moment </span>
+                Matters
+              </h1>
+              
+              <p className="text-xl text-purple-100 mb-8 leading-relaxed">
+                Experience seamless event booking, real-time seat selection, and premium in-venue services all in one platform.
+              </p>
+
+              <div className="grid gap-4 mb-8">
+                <div className="flex items-center gap-3 text-purple-100">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/30 flex items-center justify-center">
+                    <Sparkles size={16} />
+                  </div>
+                  <span>Real-time seat availability & locking</span>
+                </div>
+                <div className="flex items-center gap-3 text-purple-100">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/30 flex items-center justify-center">
+                    <Flame size={16} />
+                  </div>
+                  <span>Live crowd heatmaps & smart routing</span>
+                </div>
+                <div className="flex items-center gap-3 text-purple-100">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/30 flex items-center justify-center">
+                    <Crown size={16} />
+                  </div>
+                  <span>In-seat food & beverage ordering</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-purple-200">
+                <div className="flex -space-x-2">
+                  {[1,2,3,4].map((i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white/20 flex items-center justify-center text-xs font-bold">
+                      {String.fromCharCode(64 + i)}
+                    </div>
+                  ))}
+                </div>
+                <span>Trusted by 10,000+ fans</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8 lg:p-12">
+            <form onSubmit={submit} className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">
+                  {mode === 'login' ? 'Welcome Back' : 'Join the Experience'}
+                </h2>
+                <p className="text-purple-200">
+                  {mode === 'login' 
+                    ? 'Sign in to access your personalized venue experience' 
+                    : 'Create your account and get exclusive access'}
+                </p>
+              </div>
+
+              {mode === 'register' && (
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-200 mb-2">Full Name</label>
+                  <div className="relative">
+                    <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300" size={18} />
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                      placeholder="Enter your full name"
+                      required={mode === 'register'}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="group">
+                <label className="block text-sm font-medium text-purple-200 mb-2">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300" size={18} />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="block text-sm font-medium text-purple-200 mb-2">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300" size={18} />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-300 hover:text-purple-100 transition"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {mode === 'register' && (
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-200 mb-2">Account Type</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all cursor-pointer"
+                  >
+                    <option value="user" className="bg-slate-800">🎫 Event Fan</option>
+                    <option value="vendor" className="bg-slate-800">🍽️ Food Vendor</option>
+                    <option value="admin" className="bg-slate-800">👑 Venue Admin</option>
+                  </select>
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm">
+                  <AlertCircle size={16} />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                    <ArrowRight size={18} />
+                  </div>
+                )}
+              </button>
+
+              <p className="text-center text-sm text-purple-200">
+                {mode === 'login' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <Link to="/register" className="text-purple-300 hover:text-purple-100 font-semibold transition">
+                      Sign up for free
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-purple-300 hover:text-purple-100 font-semibold transition">
+                      Sign in
+                    </Link>
+                  </>
+                )}
+              </p>
+
+              {mode === 'login' && (
+                <p className="text-center text-xs text-purple-300/70">
+                  Demo credentials: any seeded account with password "password123"
+                </p>
+              )}
+            </form>
           </div>
         </div>
-
-        <form onSubmit={submit} className="rounded-[28px] border border-white/10 bg-slate-950/60 p-8">
-          <h2 className="text-2xl font-semibold text-white">{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            {mode === 'login'
-              ? 'Demo password for all seeded accounts: password123'
-              : 'Register a new account to access the platform'}
-          </p>
-          {mode === 'register' ? (
-            <label className="mt-6 block text-sm text-slate-200">
-              Full name
-              <input className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </label>
-          ) : null}
-          <label className="mt-4 block text-sm text-slate-200">
-            Email
-            <input className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </label>
-          <label className="mt-4 block text-sm text-slate-200">
-            Password
-            <input className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-          </label>
-          {mode === 'register' ? (
-            <label className="mt-4 block text-sm text-slate-200">
-              Role
-              <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
-                <option value="user">User</option>
-                <option value="vendor">Vendor</option>
-                <option value="admin">Admin</option>
-              </select>
-            </label>
-          ) : null}
-          {error ? <p className="mt-4 rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p> : null}
-          <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-sky-400" disabled={loading}>
-            {loading ? 'Working...' : mode === 'login' ? 'Sign in' : 'Create account'}
-            <ArrowRight size={16} />
-          </button>
-          <p className="mt-5 text-sm text-slate-300">
-            {mode === 'login' ? (
-              <>Need an account? <Link className="text-sky-300" to="/register">Register</Link></>
-            ) : (
-              <>Already have an account? <Link className="text-sky-300" to="/login">Login</Link></>
-            )}
-          </p>
-        </form>
       </div>
     </div>
   );
@@ -593,71 +771,146 @@ function PlatformLayout({
   statusMessage: string;
   user: AppUser | null;
 }) {
-  const userLinks = [{ href: '/events', label: 'Events' }];
-  const roleLinks =
-    user?.role === 'vendor'
-      ? [{ href: '/vendor/dashboard', label: 'Vendor Dashboard' }]
-      : user?.role === 'admin'
-        ? [{ href: '/admin/dashboard', label: 'Admin Dashboard' }]
-        : userLinks;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const navItems = [
+    { href: '/events', label: 'Events', icon: Calendar },
+    { href: '/venue-map', label: 'Venue Map', icon: Map },
+    { href: '/order-food', label: 'Order Food', icon: Coffee },
+    { href: '/my-orders', label: 'My Orders', icon: ShoppingCart }
+  ];
+  
+  const vendorItems = [
+    { href: '/vendor/dashboard', label: 'Vendor Dashboard', icon: Warehouse }
+  ];
+  
+  const adminItems = [
+    { href: '/admin/dashboard', label: 'Admin Dashboard', icon: Settings }
+  ];
+  
+  const navigationItems = user?.role === 'vendor' ? vendorItems : 
+                         user?.role === 'admin' ? adminItems : 
+                         navItems;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-5 md:px-6">
-      <header className="sticky top-4 z-20">
-        <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-1 shadow-glow backdrop-blur">
-          <div className="flex flex-col gap-4 rounded-[24px] bg-white/5 px-5 py-4 md:flex-row md:items-center md:justify-between">
-            <Link to="/events" className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-sky-400/25 to-emerald-400/15 text-sky-100 ring-1 ring-white/10">
-                <Waves size={18} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">VenueFlow</p>
-                <h1 className="text-lg font-semibold text-white md:text-xl">Smart venue orchestration</h1>
-              </div>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-1000"></div>
+      </div>
 
-            <nav className="flex flex-wrap items-center gap-2 md:justify-center">
-              <div className="flex flex-wrap gap-2 rounded-full border border-white/10 bg-slate-950/40 p-1">
-                {roleLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      location === item.href
-                        ? 'bg-sky-400 text-slate-950 shadow-[0_10px_30px_rgba(79,179,255,0.20)]'
-                        : 'text-slate-100 hover:bg-white/10'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
-
-            <div className="flex items-center justify-between gap-3 md:justify-end">
-              <div className="flex items-center gap-3">
-                <div className="hidden rounded-full border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-slate-200 md:block">
-                  {user?.name}
+      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-5 md:px-6">
+        <header className="sticky top-4 z-20">
+          <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4">
+              <Link to="/events" className="flex items-center gap-3 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition"></div>
+                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <Waves size={20} className="text-white" />
+                  </div>
                 </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-purple-300">VenueFlow</p>
+                  <h1 className="text-lg font-bold text-white">Premium Venue Experience</h1>
+                </div>
+              </Link>
+
+              <nav className="hidden md:flex items-center gap-2">
+                {navigationItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                          : 'text-purple-100 hover:bg-white/10'
+                      }`}
+                    >
+                      <Icon size={16} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-3 px-3 py-2 rounded-xl bg-white/10">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <span className="text-sm font-bold text-white">
+                      {user?.name?.charAt(0) || 'U'}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium text-white">{user?.name}</span>
+                </div>
+                
                 <button
                   onClick={logout}
-                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-slate-950/40 p-3 text-slate-100 transition hover:bg-white/10"
-                  aria-label="Log out"
+                  className="p-2 rounded-xl bg-white/10 text-purple-100 hover:bg-white/20 transition-all"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
+                </button>
+
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="md:hidden p-2 rounded-xl bg-white/10 text-purple-100"
+                >
+                  {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        {statusMessage ? (
-          <div className="mt-3 rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100 backdrop-blur">
-            {statusMessage}
+            {mobileMenuOpen && (
+              <div className="md:hidden border-t border-white/10 p-4 space-y-2">
+                {navigationItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                          : 'text-purple-100 hover:bg-white/10'
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+                <div className="pt-3 mt-3 border-t border-white/10">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                      <span className="text-sm font-bold text-white">{user?.name?.charAt(0) || 'U'}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">{user?.name}</p>
+                      <p className="text-xs text-purple-300">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        ) : null}
-      </header>
-      <div className="flex-1">{children}</div>
+
+          {statusMessage && (
+            <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 backdrop-blur-sm animate-in slide-in-from-top duration-300">
+              <div className="flex items-center gap-2">
+                <Info size={16} className="text-purple-300" />
+                <p className="text-sm text-purple-100">{statusMessage}</p>
+              </div>
+            </div>
+          )}
+        </header>
+
+        <div className="flex-1">{children}</div>
+      </div>
     </div>
   );
 }
@@ -665,7 +918,9 @@ function PlatformLayout({
 function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
   const [query, setQuery] = useState('');
   const [activeSport, setActiveSport] = useState<string>('All');
+  const navigate = useNavigate();
   const now = Date.now();
+  
   const featuredFromBootstrap = bootstrap
     ? {
         id: 'event-1',
@@ -674,18 +929,21 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
         venue: bootstrap.event.venue,
         startsAt: bootstrap.event.startsAt,
         endsAt: bootstrap.event.endsAt,
+        image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067',
+        price: '₹2,499',
+        tickets: 1243,
       }
     : null;
+    
   const sampleEvents = [
     ...(featuredFromBootstrap ? [featuredFromBootstrap] : []),
-    { id: 'event-2', sport: 'Football', name: 'Derby Night 2026', venue: 'City Stadium', startsAt: new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-3', sport: 'Baseball', name: 'Season Opener', venue: 'Downtown Ballpark', startsAt: new Date(now + 6 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 6 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-4', sport: 'Tennis', name: 'Grand Slam Qualifiers', venue: 'Riverside Courts', startsAt: new Date(now + 9 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 9 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-5', sport: 'Basketball', name: 'All-Star Showcase', venue: 'Metropolitan Arena', startsAt: new Date(now + 12 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 12 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-6', sport: 'Hockey', name: 'Winter Classic', venue: 'Ice Dome', startsAt: new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 14 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-7', sport: 'Cricket', name: 'T20 Night Match', venue: 'Harbor Grounds', startsAt: new Date(now + 17 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 17 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-8', sport: 'Football', name: 'International Friendly', venue: 'National Park Stadium', startsAt: new Date(now + 20 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 20 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
-    { id: 'event-9', sport: 'Baseball', name: 'Rivals Weekend', venue: 'Lakeside Field', startsAt: new Date(now + 24 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 24 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString() },
+    { id: 'event-2', sport: 'Football', name: 'Champions League Final', venue: 'City Stadium', startsAt: new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070', price: '₹3,999', tickets: 2341 },
+    { id: 'event-3', sport: 'Baseball', name: 'World Series Opener', venue: 'Downtown Ballpark', startsAt: new Date(now + 6 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 6 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=2070', price: '₹2,199', tickets: 876 },
+    { id: 'event-4', sport: 'Tennis', name: 'Grand Slam Finals', venue: 'Riverside Courts', startsAt: new Date(now + 9 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 9 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1622279457486-62d1194a0b0d?q=80&w=2070', price: '₹1,899', tickets: 543 },
+    { id: 'event-5', sport: 'Basketball', name: 'NBA All-Star Game', venue: 'Metropolitan Arena', startsAt: new Date(now + 12 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 12 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2070', price: '₹4,499', tickets: 3210 },
+    { id: 'event-6', sport: 'Hockey', name: 'Winter Classic', venue: 'Ice Dome', startsAt: new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 14 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1515705576963-95dd6294b3e7?q=80&w=2070', price: '₹2,799', tickets: 987 },
+    { id: 'event-7', sport: 'Cricket', name: 'T20 World Cup', venue: 'Harbor Grounds', startsAt: new Date(now + 17 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 17 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067', price: '₹3,299', tickets: 1543 },
+    { id: 'event-8', sport: 'Football', name: 'Derby Match', venue: 'National Park Stadium', startsAt: new Date(now + 20 * 24 * 60 * 60 * 1000).toISOString(), endsAt: new Date(now + 20 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(), image: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=2070', price: '₹5,999', tickets: 876 },
   ];
 
   const sports = useMemo(() => {
@@ -706,120 +964,155 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
     });
   }, [activeSport, query, sampleEvents]);
 
-  return (
-    <div className="space-y-6">
-      <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 backdrop-blur">
-        <div className="relative px-6 py-7 sm:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/15 via-transparent to-emerald-500/10" />
-          <div className="relative">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">Events</p>
-            <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <h2 className="text-3xl font-semibold text-white sm:text-4xl">Pick your match night.</h2>
-                <p className="mt-3 max-w-2xl text-sm text-slate-300">
-                  Browse upcoming sports events and open the live venue experience with seat locking, heatmap routing, and in-seat orders.
-                </p>
-              </div>
-              <Link
-                className="inline-flex items-center justify-center rounded-full bg-sky-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
-                to="/venue-map"
-              >
-                Open venue experience
-                <ArrowRight className="ml-2" size={16} />
-              </Link>
-            </div>
+  const featuredEvent = filteredEvents[0];
 
-            <div className="mt-6 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-300">
-                  <Search size={18} />
-                </div>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by event, venue, or sport..."
-                  className="w-full rounded-2xl border border-white/10 bg-slate-950/50 py-3 pl-12 pr-4 text-sm text-slate-100 placeholder:text-slate-400 focus:border-sky-300/50 focus:outline-none"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {sports.map((sport) => (
-                  <button
-                    key={sport}
-                    onClick={() => setActiveSport(sport)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      activeSport === sport ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100 hover:bg-white/10'
-                    }`}
-                  >
-                    {sport}
-                  </button>
-                ))}
+  const handleGetTickets = () => {
+    navigate('/venue-map');
+  };
+
+  return (
+    <div className="space-y-8">
+      {featuredEvent && (
+        <div className="relative rounded-2xl overflow-hidden group cursor-pointer" onClick={handleGetTickets}>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10"></div>
+          <img 
+            src={featuredEvent.image} 
+            alt={featuredEvent.name}
+            className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 z-20 flex flex-col justify-end p-8">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white">
+                FEATURED EVENT
+              </span>
+              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white">
+                {featuredEvent.sport}
+              </span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">{featuredEvent.name}</h2>
+            <p className="text-purple-200 mb-4">{featuredEvent.venue} • {new Date(featuredEvent.startsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleGetTickets}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+              >
+                Get Tickets
+                <ArrowRight size={18} />
+              </button>
+              <div className="flex items-center gap-2 text-white">
+                <Users size={18} />
+                <span>{featuredEvent.tickets.toLocaleString()} tickets sold</span>
               </div>
             </div>
           </div>
         </div>
+      )}
+
+      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-300" size={20} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events by name, venue, or sport..."
+              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 transition-all"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
+            {sports.map((sport) => (
+              <button
+                key={sport}
+                onClick={() => setActiveSport(sport)}
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                  activeSport === sport
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                }`}
+              >
+                {sport}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredEvents.map((event) => (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredEvents.slice(1).map((event) => (
           <div
             key={event.id}
-            className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-5 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10"
+            className="group relative bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => navigate('/venue-map')}
           >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
-              <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-sky-400/10 blur-2xl" />
-              <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-emerald-400/10 blur-2xl" />
-            </div>
-
-            <div className="relative flex items-start justify-between gap-3">
-              <div>
-                <p className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
-                  {event.sport}
-                </p>
-                <h3 className="mt-3 text-xl font-semibold text-white">{event.name}</h3>
-                <p className="mt-2 text-sm text-slate-300">{event.venue}</p>
-              </div>
-              <div className="rounded-2xl bg-slate-950/40 p-3 text-slate-100 transition group-hover:bg-slate-950/55">
-                <Ticket size={18} />
+            <div className="relative h-48 overflow-hidden">
+              <img 
+                src={event.image} 
+                alt={event.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs font-bold text-white">
+                {event.sport}
               </div>
             </div>
-
-            <div className="relative mt-4 grid gap-2 text-sm">
-              <div className="flex items-center justify-between rounded-2xl bg-slate-950/40 px-4 py-3">
-                <span className="text-slate-400">Starts</span>
-                <span className="font-medium text-white">{new Date(event.startsAt).toLocaleString()}</span>
+            
+            <div className="p-5">
+              <h3 className="text-xl font-bold text-white mb-2">{event.name}</h3>
+              <div className="flex items-center gap-2 text-purple-200 text-sm mb-3">
+                <MapPin size={14} />
+                <span>{event.venue}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-slate-950/40 px-4 py-3">
-                <span className="text-slate-400">Ends</span>
-                <span className="font-medium text-white">{new Date(event.endsAt).toLocaleString()}</span>
+              <div className="flex items-center gap-2 text-purple-200 text-sm mb-4">
+                <Calendar size={14} />
+                <span>{new Date(event.startsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
               </div>
+              
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-2xl font-bold text-white">{event.price}</p>
+                  <p className="text-xs text-purple-300">per ticket</p>
+                </div>
+                <div className="flex items-center gap-1 text-purple-300">
+                  <Users size={14} />
+                  <span className="text-sm">{event.tickets} tickets</span>
+                </div>
+              </div>
+              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/venue-map');
+                }}
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all"
+              >
+                Select Seats
+                <ChevronRight size={16} />
+              </button>
             </div>
-
-            <Link
-              className="relative mt-4 inline-flex w-full items-center justify-center rounded-full bg-sky-400 px-5 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
-              to="/venue-map"
-            >
-              Open event
-              <ArrowRight className="ml-2" size={16} />
-            </Link>
           </div>
         ))}
       </div>
 
-      {!filteredEvents.length ? (
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
-          No events match your search. Try a different keyword or filter.
+      {!filteredEvents.length && (
+        <div className="text-center py-12 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20">
+          <p className="text-purple-200">No events match your search criteria.</p>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
 
 function FeatureCard({ icon: Icon, subtitle, title }: { icon: typeof Ticket; subtitle: string; title: string }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-slate-950/40 p-5">
-      <div className="mb-4 inline-flex rounded-2xl bg-white/10 p-3"><Icon size={18} /></div>
-      <h3 className="text-lg font-semibold text-white">{title}</h3>
-      <p className="mt-2 text-sm text-slate-300">{subtitle}</p>
+    <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm p-6 hover:bg-white/20 transition-all transform hover:-translate-y-1">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all"></div>
+      <div className="relative">
+        <div className="mb-4 inline-flex p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+          <Icon className="text-white" size={20} />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+        <p className="text-purple-200 text-sm">{subtitle}</p>
+      </div>
     </div>
   );
 }
@@ -845,6 +1138,7 @@ function VenueMapPage({
 }) {
   const [selectedSection, setSelectedSection] = useState<string>('');
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const sections = useMemo(
     () => Array.from(new Set((bootstrap?.seats ?? []).map((seat) => seat.sectionId))),
@@ -865,46 +1159,63 @@ function VenueMapPage({
     ? Math.max(0, Math.floor((Date.parse(activeHold.expiresAt) - Date.now()) / 1000))
     : 0;
 
-  if (!bootstrap) return <LoadingPanel label="Loading venue state..." />;
+  if (!bootstrap) return <LoadingPanel label="Loading venue experience..." />;
 
   return (
     <>
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-4">
-            <StatCard
-              icon={Users}
-              title="Live occupancy"
-              value={`${bootstrap.zones.reduce((sum, zone) => sum + zone.occupancy, 0)}`}
-              caption="Across tracked zones"
-            />
-            <StatCard icon={Clock3} title="Fastest gate" value={guidance?.recommendedGate ?? 'Gate A'} caption="Heatmap recommendation" />
-            <StatCard icon={Car} title="Parking" value={guidance?.recommendedParking ?? 'P1'} caption="Suggested zone" />
-            <StatCard icon={ShieldCheck} title="Seat hold" value={activeHold ? 'Active' : 'None'} caption="10-minute lock window" />
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <Users className="text-purple-300" size={20} />
+                <span className="text-xs text-purple-300">Live</span>
+              </div>
+              <p className="text-2xl font-bold text-white">{bootstrap.zones.reduce((sum, zone) => sum + zone.occupancy, 0)}</p>
+              <p className="text-sm text-purple-200">Current Occupancy</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <Navigation className="text-purple-300" size={20} />
+                <span className="text-xs text-purple-300">Recommended</span>
+              </div>
+              <p className="text-2xl font-bold text-white">{guidance?.recommendedGate ?? 'Gate A'}</p>
+              <p className="text-sm text-purple-200">Fastest Entry Gate</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <Car className="text-purple-300" size={20} />
+                <span className="text-xs text-purple-300">Suggested</span>
+              </div>
+              <p className="text-2xl font-bold text-white">{guidance?.recommendedParking ?? 'P1'}</p>
+              <p className="text-sm text-purple-200">Parking Zone</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <Lock className="text-purple-300" size={20} />
+                <span className="text-xs text-purple-300">Status</span>
+              </div>
+              <p className="text-2xl font-bold text-white">{activeHold ? 'Active' : 'None'}</p>
+              <p className="text-sm text-purple-200">Seat Hold</p>
+            </div>
           </div>
 
-          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 backdrop-blur">
-            <div className="relative px-6 py-6 sm:px-7">
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/10 via-transparent to-emerald-500/10" />
-              <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
+            <div className="p-6 border-b border-white/10">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/70">Venue map</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{bootstrap.event.name}</h2>
-                  <p className="mt-2 text-sm text-slate-300">
-                    Select seats, lock them for checkout, and complete a dummy payment to confirm.
-                  </p>
-                  <p className="mt-3 text-xs text-slate-400">
-                    {bootstrap.event.venue} • {new Date(bootstrap.event.startsAt).toLocaleString()}
-                  </p>
+                  <h2 className="text-2xl font-bold text-white">{bootstrap.event.name}</h2>
+                  <p className="text-purple-200 mt-1">{bootstrap.event.venue} • {new Date(bootstrap.event.startsAt).toLocaleString()}</p>
                 </div>
-
-                <div className="flex flex-wrap gap-2 rounded-[24px] border border-white/10 bg-slate-950/40 p-2">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {sections.map((section) => (
                     <button
                       key={section}
                       onClick={() => setSelectedSection(section)}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        selectedSection === section ? 'bg-sky-400 text-slate-950' : 'bg-white/5 text-slate-100 hover:bg-white/10'
+                      className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                        selectedSection === section
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
                       }`}
                     >
                       {section}
@@ -914,7 +1225,7 @@ function VenueMapPage({
               </div>
             </div>
 
-            <div className="grid gap-5 border-t border-white/10 p-5 lg:grid-cols-[1fr_0.9fr]">
+            <div className="grid gap-6 p-6 lg:grid-cols-[1fr_0.9fr]">
               <SeatGrid
                 seats={visibleSeats}
                 selectedSeats={selectedSeats}
@@ -932,82 +1243,92 @@ function VenueMapPage({
 
         <aside className="space-y-6">
           <div className="sticky top-28 space-y-6">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Checkout</h3>
-                <span className="rounded-full bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
-                  {activeHold ? 'Hold active' : 'Select seats'}
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Checkout</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  activeHold ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
+                }`}>
+                  {activeHold ? 'Hold Active' : 'Select Seats'}
                 </span>
               </div>
 
-              <div className="mt-4 space-y-3">
-                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
-                  <p className="text-sm text-slate-300">Selected seats</p>
-                  <p className="mt-2 text-base font-semibold text-white">
-                    {selectedSeats.length ? selectedSeats.join(', ') : 'None yet'}
+              <div className="space-y-4">
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-sm text-purple-200 mb-2">Selected Seats</p>
+                  <p className="text-lg font-semibold text-white">
+                    {selectedSeats.length ? selectedSeats.join(', ') : 'None selected'}
                   </p>
-                  <div className="mt-3 flex items-center justify-between text-sm">
-                    <span className="text-slate-400">Total</span>
-                    <span className="font-semibold text-white">₹{selectedTotal}</span>
+                  <div className="mt-3 pt-3 border-t border-white/10 flex justify-between">
+                    <span className="text-purple-200">Total Amount</span>
+                    <span className="text-xl font-bold text-white">₹{selectedTotal}</span>
                   </div>
                 </div>
 
-                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
-                  <p className="text-sm text-slate-300">Arrival guidance</p>
-                  <p className="mt-2 text-sm text-slate-200">
-                    Gate <span className="font-semibold text-white">{guidance?.recommendedGate ?? 'Gate A'}</span> • Parking{' '}
-                    <span className="font-semibold text-white">{guidance?.recommendedParking ?? 'P1'}</span>
-                  </p>
-                  <p className="mt-2 text-xs text-slate-400">
-                    {activeHold
-                      ? `Hold expires in ${Math.floor(holdCountdown / 60)}m ${holdCountdown % 60}s`
-                      : 'Lock seats to start a 10-minute checkout hold.'}
-                  </p>
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-sm text-purple-200 mb-2">Smart Guidance</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-purple-300">Recommended Gate:</span>
+                      <span className="text-white font-semibold">{guidance?.recommendedGate ?? 'Gate A'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-purple-300">Parking Zone:</span>
+                      <span className="text-white font-semibold">{guidance?.recommendedParking ?? 'P1'}</span>
+                    </div>
+                    {activeHold && (
+                      <div className="mt-2 pt-2 border-t border-white/10">
+                        <p className="text-xs text-purple-300">
+                          Hold expires in {Math.floor(holdCountdown / 60)}m {holdCountdown % 60}s
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {!activeHold ? (
                   <button
                     onClick={() => lockSeats(selectedSeats)}
                     disabled={!selectedSeats.length}
-                    className="w-full rounded-full bg-sky-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Lock seats & start checkout
+                    Lock Seats & Start Checkout
                   </button>
                 ) : (
-                  <div className="grid gap-3">
+                  <div className="space-y-3">
                     <button
                       onClick={confirmPayment}
-                      className="w-full rounded-full bg-emerald-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-300"
+                      className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all"
                     >
-                      Confirm dummy payment
+                      Confirm Payment
                     </button>
                     <button
                       onClick={releaseHold}
-                      className="w-full rounded-full bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+                      className="w-full py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
                     >
-                      Release hold
+                      Release Hold
                     </button>
                   </div>
                 )}
 
-                <div className="rounded-[22px] border border-white/10 bg-slate-950/45 p-4">
-                  <p className="text-sm font-semibold text-white">Seat status legend</p>
-                  <div className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-sm font-semibold text-white mb-3">Seat Legend</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded bg-white/10 ring-1 ring-white/10" />
-                      Available
+                      <div className="w-3 h-3 rounded bg-green-500/30 border border-green-400/50"></div>
+                      <span className="text-purple-200">Available</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded bg-sky-400/25 ring-1 ring-sky-300/40" />
-                      Selected
+                      <div className="w-3 h-3 rounded bg-purple-500/30 border border-purple-400/50"></div>
+                      <span className="text-purple-200">Selected</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded bg-amber-500/15 ring-1 ring-amber-300/30" />
-                      Locked
+                      <div className="w-3 h-3 rounded bg-yellow-500/30 border border-yellow-400/50"></div>
+                      <span className="text-purple-200">Locked</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded bg-white/5 ring-1 ring-white/5" />
-                      Booked
+                      <div className="w-3 h-3 rounded bg-red-500/30 border border-red-400/50"></div>
+                      <span className="text-purple-200">Booked</span>
                     </div>
                   </div>
                 </div>
@@ -1020,54 +1341,67 @@ function VenueMapPage({
         </aside>
       </div>
 
-      {paymentReceipt ? (
-        <Modal onClose={dismissReceipt} title="Payment confirmed">
-          <div className="space-y-4">
-            <div className="rounded-[22px] border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-50">
-              Dummy payment succeeded. Your booking is confirmed.
-            </div>
-            <div className="grid gap-3">
-              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
-                <span className="text-sm text-slate-300">Booking</span>
-                <span className="font-semibold text-white">{paymentReceipt.booking.id.slice(0, 8)}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
-                <span className="text-sm text-slate-300">Seats</span>
-                <span className="font-semibold text-white">{paymentReceipt.booking.seatIds.join(', ')}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
-                <span className="text-sm text-slate-300">Amount</span>
-                <span className="font-semibold text-white">₹{paymentReceipt.booking.amount}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3">
-                <span className="text-sm text-slate-300">Gate / Parking</span>
-                <span className="font-semibold text-white">
-                  {paymentReceipt.booking.gate} • {paymentReceipt.booking.parkingZone}
-                </span>
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                onClick={() => {
-                  dismissReceipt();
-                  setSelectedSeats([]);
-                }}
-                className="rounded-full bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
-              >
-                Continue browsing
+      {paymentReceipt && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-gradient-to-br from-slate-900 to-purple-900 rounded-2xl border border-white/20 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <h3 className="text-xl font-bold text-white">Payment Successful!</h3>
+              <button onClick={dismissReceipt} className="p-2 rounded-xl bg-white/10 text-purple-100 hover:bg-white/20 transition-all">
+                <X size={18} />
               </button>
-              <Link
-                to="/events"
-                onClick={dismissReceipt}
-                className="inline-flex items-center justify-center rounded-full bg-sky-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-sky-300"
-              >
-                Back to events
-                <ArrowRight className="ml-2" size={16} />
-              </Link>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="text-center">
+                <div className="inline-flex p-3 bg-green-500/20 rounded-full mb-4">
+                  <CheckCircle2 className="text-green-400" size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Booking Confirmed!</h3>
+                <p className="text-purple-200">Your seats have been successfully booked.</p>
+              </div>
+              
+              <div className="bg-white/5 rounded-xl p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-300">Booking ID:</span>
+                  <span className="text-white font-mono">{paymentReceipt.booking.id.slice(0, 8)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-300">Seats:</span>
+                  <span className="text-white font-semibold">{paymentReceipt.booking.seatIds.join(', ')}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-300">Amount Paid:</span>
+                  <span className="text-white font-semibold">₹{paymentReceipt.booking.amount}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-300">Gate/Parking:</span>
+                  <span className="text-white">{paymentReceipt.booking.gate} • {paymentReceipt.booking.parkingZone}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    dismissReceipt();
+                    setSelectedSeats([]);
+                  }}
+                  className="flex-1 py-2.5 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
+                >
+                  Continue Browsing
+                </button>
+                <button
+                  onClick={() => {
+                    dismissReceipt();
+                    navigate('/events');
+                  }}
+                  className="flex-1 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all"
+                >
+                  Back to Events
+                </button>
+              </div>
             </div>
           </div>
-        </Modal>
-      ) : null}
+        </div>
+      )}
     </>
   );
 }
@@ -1082,35 +1416,95 @@ function OrderFoodPage({
   placeOrder: (cart: CartItem) => Promise<void>;
 }) {
   const [cart, setCart] = useState<CartItem>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const navigate = useNavigate();
+  
   if (!bootstrap) return <LoadingPanel label="Loading menu..." />;
+
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(bootstrap.menu.map(item => item.category)));
+    return ['All', ...cats];
+  }, [bootstrap.menu]);
+
+  const filteredMenu = useMemo(() => {
+    if (selectedCategory === 'All') return bootstrap.menu;
+    return bootstrap.menu.filter(item => item.category === selectedCategory);
+  }, [selectedCategory, bootstrap.menu]);
+
+  const cartTotal = useMemo(() => {
+    return bootstrap.menu.reduce((sum, item) => sum + (item.price * (cart[item.id] || 0)), 0);
+  }, [cart, bootstrap.menu]);
+
+  const handlePlaceOrder = async () => {
+    if (!latestBooking) {
+      alert('Please book seats first before placing a food order');
+      navigate('/venue-map');
+      return;
+    }
+    await placeOrder(cart);
+    setCart({});
+  };
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/order-food</p>
-            <h2 className="text-2xl font-semibold text-white">Mobile food & beverage ordering</h2>
-          </div>
-          <div className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-100">{latestBooking ? `Deliver to ${latestBooking.seatIds[0]}` : 'No active booking'}</div>
+      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Food & Beverage</h2>
+          <p className="text-purple-200">Order from your seat and we'll deliver right to you</p>
+          {!latestBooking && (
+            <div className="mt-3 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-xl">
+              <p className="text-sm text-yellow-200">⚠️ You need an active booking to place food orders. Please select seats first.</p>
+              <button onClick={() => navigate('/venue-map')} className="mt-2 text-sm text-purple-300 hover:text-purple-100 underline">
+                Go to Venue Map →
+              </button>
+            </div>
+          )}
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {bootstrap.menu.map((item) => (
-            <div key={item.id} className="rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
-              <div className="flex items-start justify-between">
+
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                selectedCategory === category
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'bg-white/10 text-purple-100 hover:bg-white/20'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {filteredMenu.map((item) => (
+            <div key={item.id} className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all">
+              <div className="flex items-start justify-between mb-3">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{item.category}</p>
-                  <h3 className="mt-2 text-lg font-semibold text-white">{item.name}</h3>
+                  <h3 className="font-semibold text-white">{item.name}</h3>
+                  <p className="text-xs text-purple-300">Prep: {item.prepTime} min</p>
                 </div>
-                <div className="rounded-2xl bg-white/5 p-3"><Coffee size={18} /></div>
+                <div className="text-lg font-bold text-white">₹{item.price}</div>
               </div>
-              <p className="mt-4 text-sm text-slate-300">Prep time {item.prepTime} min</p>
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-xl font-semibold text-white">₹{item.price}</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setCart((current) => ({ ...current, [item.id]: Math.max((current[item.id] ?? 0) - 1, 0) }))} className="rounded-full bg-white/5 px-3 py-2">-</button>
-                  <span className="w-6 text-center">{cart[item.id] ?? 0}</span>
-                  <button onClick={() => setCart((current) => ({ ...current, [item.id]: (current[item.id] ?? 0) + 1 }))} className="rounded-full bg-white/5 px-3 py-2">+</button>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-200">{item.category}</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setCart(prev => ({ ...prev, [item.id]: Math.max((prev[item.id] || 0) - 1, 0) }))}
+                    className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
+                    disabled={!latestBooking}
+                  >
+                    -
+                  </button>
+                  <span className="text-white font-semibold min-w-[20px] text-center">{cart[item.id] || 0}</span>
+                  <button
+                    onClick={() => setCart(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                    className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
+                    disabled={!latestBooking}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             </div>
@@ -1119,23 +1513,51 @@ function OrderFoodPage({
       </div>
 
       <div className="space-y-6">
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-          <div className="flex items-center gap-3">
-            <ShoppingCart size={20} />
-            <h3 className="text-lg font-semibold text-white">Cart summary</h3>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 sticky top-28">
+          <div className="flex items-center gap-3 mb-4">
+            <ShoppingCart className="text-purple-300" size={24} />
+            <h3 className="text-xl font-bold text-white">Your Order</h3>
           </div>
-          <div className="mt-4 space-y-3">
-            {bootstrap.menu.filter((item) => (cart[item.id] ?? 0) > 0).map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-2xl bg-slate-950/50 px-4 py-3">
-                <span>{item.name} x {cart[item.id]}</span>
-                <span>₹{item.price * (cart[item.id] ?? 0)}</span>
+
+          <div className="space-y-3 max-h-[400px] overflow-y-auto mb-4">
+            {bootstrap.menu.filter(item => (cart[item.id] || 0) > 0).map((item) => (
+              <div key={item.id} className="flex justify-between items-center py-2 border-b border-white/10">
+                <div>
+                  <p className="text-white font-medium">{item.name}</p>
+                  <p className="text-xs text-purple-300">x{cart[item.id]}</p>
+                </div>
+                <span className="text-white font-semibold">₹{item.price * (cart[item.id] || 0)}</span>
               </div>
             ))}
+            {Object.values(cart).every(v => v === 0) && (
+              <p className="text-purple-200 text-center py-8">Your cart is empty</p>
+            )}
           </div>
-          <button onClick={() => placeOrder(cart)} disabled={!latestBooking || Object.values(cart).every((value) => value === 0)} className="mt-6 w-full rounded-full bg-emerald-400 px-5 py-3 font-semibold text-slate-950 disabled:opacity-40">
-            Submit seat delivery order
-          </button>
+
+          {Object.values(cart).some(v => v > 0) && (
+            <>
+              <div className="pt-4 border-t border-white/10 mb-4">
+                <div className="flex justify-between text-lg font-bold">
+                  <span className="text-white">Total</span>
+                  <span className="text-white">₹{cartTotal}</span>
+                </div>
+              </div>
+              <button
+                onClick={handlePlaceOrder}
+                disabled={!latestBooking}
+                className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Place Order
+              </button>
+              {!latestBooking && (
+                <p className="text-xs text-yellow-300 text-center mt-2">
+                  Need an active booking to place food orders
+                </p>
+              )}
+            </>
+          )}
         </div>
+
         <LatestBookingCard booking={latestBooking} />
       </div>
     </div>
@@ -1144,28 +1566,51 @@ function OrderFoodPage({
 
 function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayload | null; latestBooking: Booking | null }) {
   if (!bootstrap) return <LoadingPanel label="Loading orders..." />;
+  
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-      <div className="space-y-6">
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/my-orders</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Live order and booking tracking</h2>
-          <div className="mt-6 space-y-4">
-            {bootstrap.orders.length ? bootstrap.orders.map((order) => (
-              <div key={order.id} className="rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
-                <div className="flex items-center justify-between">
+      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+        <h2 className="text-2xl font-bold text-white mb-2">My Orders</h2>
+        <p className="text-purple-200 mb-6">Track your food orders and bookings</p>
+        
+        <div className="space-y-4">
+          {bootstrap.orders.length > 0 ? (
+            bootstrap.orders.map((order) => (
+              <div key={order.id} className="bg-white/5 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-sm text-slate-400">{order.id.slice(0, 8)}</p>
-                    <h3 className="text-lg font-semibold text-white">Seat {order.seatId}</h3>
+                    <p className="text-sm font-mono text-purple-300">{order.id.slice(0, 8)}</p>
+                    <h3 className="font-semibold text-white">Seat {order.seatId}</h3>
                   </div>
-                  <span className="rounded-full bg-white/5 px-4 py-2 text-sm">{order.status}</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    order.status === 'delivered' ? 'bg-green-500/20 text-green-300' :
+                    order.status === 'preparing' ? 'bg-yellow-500/20 text-yellow-300' :
+                    'bg-purple-500/20 text-purple-300'
+                  }`}>
+                    {order.status}
+                  </span>
                 </div>
-                <p className="mt-3 text-sm text-slate-300">Total ₹{order.total}</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-300">Total</span>
+                  <span className="text-white font-semibold">₹{order.total}</span>
+                </div>
+                <div className="flex justify-between text-xs text-purple-300 mt-2">
+                  <span>{new Date(order.createdAt).toLocaleString()}</span>
+                  <span>{order.items.length} items</span>
+                </div>
               </div>
-            )) : <p className="text-slate-300">No orders placed yet.</p>}
-          </div>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-purple-200">No orders yet</p>
+              <Link to="/order-food" className="inline-block mt-4 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all">
+                Browse Menu
+              </Link>
+            </div>
+          )}
         </div>
       </div>
+      
       <div className="space-y-6">
         <LatestBookingCard booking={latestBooking} />
         <NotificationsPanel notifications={bootstrap.notifications} />
@@ -1176,34 +1621,103 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
 
 function VendorDashboardPage({ token, updateOrder }: { token: string | null; updateOrder: (orderId: string, status: string) => Promise<void> }) {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filter, setFilter] = useState<string>('all');
+  
   useEffect(() => {
     if (!token) return;
-    request<{ orders: Order[] }>('/vendor/orders', token).then((data) => setOrders(data.orders)).catch(() => undefined);
+    request<{ orders: Order[] }>('/vendor/orders', token)
+      .then((data) => setOrders(data.orders))
+      .catch(() => undefined);
   }, [token]);
 
+  const filteredOrders = orders.filter(order => filter === 'all' || order.status === filter);
+  const stats = {
+    total: orders.length,
+    pending: orders.filter(o => o.status === 'pending').length,
+    preparing: orders.filter(o => o.status === 'preparing').length,
+    completed: orders.filter(o => o.status === 'delivered').length,
+  };
+
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/70">/vendor/dashboard</p>
-      <h2 className="mt-2 text-2xl font-semibold text-white">Vendor order console</h2>
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {orders.map((order) => (
-          <div key={order.id} className="rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-white">{order.id.slice(0, 8)}</h3>
-                <p className="text-sm text-slate-400">Seat {order.seatId}</p>
-              </div>
-              <span className="rounded-full bg-white/5 px-3 py-1 text-sm">{order.status}</span>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {['accepted', 'preparing', 'ready', 'rejected'].map((status) => (
-                <button key={status} onClick={() => updateOrder(order.id, status)} className="rounded-full bg-white/5 px-4 py-2 text-sm">
-                  {status}
-                </button>
-              ))}
-            </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-white">{stats.total}</p>
+          <p className="text-sm text-purple-200">Total Orders</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-yellow-300">{stats.pending}</p>
+          <p className="text-sm text-purple-200">Pending</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-purple-300">{stats.preparing}</p>
+          <p className="text-sm text-purple-200">Preparing</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-green-300">{stats.completed}</p>
+          <p className="text-sm text-purple-200">Completed</p>
+        </div>
+      </div>
+
+      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">Order Management</h2>
+          <div className="flex gap-2">
+            {['all', 'pending', 'preparing', 'delivered'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-xl capitalize transition-all ${
+                  filter === status
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-3">
+          {filteredOrders.map((order) => (
+            <div key={order.id} className="bg-white/5 rounded-xl p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="font-mono text-purple-300">{order.id.slice(0, 8)}</span>
+                    <span className="text-white">Seat {order.seatId}</span>
+                  </div>
+                  <div className="text-sm text-purple-200">
+                    {order.items.length} items • ₹{order.total}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  {['accepted', 'preparing', 'ready', 'delivered', 'rejected'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => updateOrder(order.id, status)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        order.status === status
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {filteredOrders.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-purple-200">No orders found</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1222,32 +1736,79 @@ function AdminDashboardPage({
 }) {
   useEffect(() => {
     refresh().catch(() => undefined);
-  }, []);
+  }, [refresh]);
 
   if (!snapshot) return <LoadingPanel label="Loading admin dashboard..." />;
+
+  const stats = {
+    occupancyRate: Math.round((snapshot.occupancy / snapshot.totalSeats) * 100),
+    activeHolds: snapshot.holds.length,
+    totalRevenue: snapshot.bookings.reduce((sum, b) => sum + b.amount, 0),
+    avgOrderValue: snapshot.orders.length ? Math.round(snapshot.orders.reduce((sum, o) => sum + o.total, 0) / snapshot.orders.length) : 0,
+  };
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard icon={Users} title="Venue occupancy" value={`${snapshot.occupancy}`} caption={`${snapshot.totalSeats} total seats`} />
-        <StatCard icon={Ticket} title="Bookings" value={`${snapshot.bookings.length}`} caption="Confirmed seats" />
-        <StatCard icon={Coffee} title="Orders" value={`${snapshot.orders.length}`} caption="Live vendor queue" />
-        <StatCard icon={Warehouse} title="Seat mapper" value={`${snapshot.mapper.length}`} caption="Tracked zones" />
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-white">{stats.occupancyRate}%</p>
+          <p className="text-sm text-purple-200">Occupancy Rate</p>
+          <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{ width: `${stats.occupancyRate}%` }}></div>
+          </div>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-white">{snapshot.bookings.length}</p>
+          <p className="text-sm text-purple-200">Confirmed Bookings</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-white">₹{stats.totalRevenue.toLocaleString()}</p>
+          <p className="text-sm text-purple-200">Total Revenue</p>
+        </div>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5">
+          <p className="text-2xl font-bold text-white">{stats.activeHolds}</p>
+          <p className="text-sm text-purple-200">Active Holds</p>
+        </div>
       </div>
+
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <HeatmapPanel zones={snapshot.zones} guidance={null} />
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-          <h3 className="text-xl font-semibold text-white">Seat + Gate + Parking mapper</h3>
-          <div className="mt-4 space-y-3">
+        
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+          <h3 className="text-xl font-bold text-white mb-4">Zone Management</h3>
+          <div className="space-y-3">
             {snapshot.mapper.map((zone) => (
-              <div key={zone.id} className="rounded-[22px] border border-white/10 bg-slate-950/50 p-4">
-                <p className="font-semibold text-white">{zone.name}</p>
-                <p className="mt-1 text-sm text-slate-400">{zone.type}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button onClick={() => updateZoneMapper(zone.id, 'Gate A', 'P1')} className="rounded-full bg-white/5 px-4 py-2 text-sm">Gate A / P1</button>
-                  <button onClick={() => updateZoneMapper(zone.id, 'Gate B', 'P2')} className="rounded-full bg-white/5 px-4 py-2 text-sm">Gate B / P2</button>
-                  <button onClick={() => updateZoneMapper(zone.id, 'Gate C', 'P3')} className="rounded-full bg-white/5 px-4 py-2 text-sm">Gate C / P3</button>
-                  <button onClick={() => simulateHeatmap(zone.id, 25)} className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950">Simulate inflow</button>
+              <div key={zone.id} className="bg-white/5 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 className="font-semibold text-white">{zone.name}</h4>
+                    <p className="text-xs text-purple-300">{zone.type}</p>
+                  </div>
+                  <span className="text-xs text-purple-300">ID: {zone.id.slice(0, 6)}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="text-sm">
+                    <p className="text-purple-300">Gate</p>
+                    <p className="text-white font-semibold">{zone.gate || 'Not set'}</p>
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-purple-300">Parking</p>
+                    <p className="text-white font-semibold">{zone.parkingZone || 'Not set'}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => updateZoneMapper(zone.id, 'Gate A', 'P1')} className="px-3 py-1.5 text-xs bg-white/10 text-purple-100 rounded-lg hover:bg-white/20 transition-all">
+                    Set Gate A/P1
+                  </button>
+                  <button onClick={() => updateZoneMapper(zone.id, 'Gate B', 'P2')} className="px-3 py-1.5 text-xs bg-white/10 text-purple-100 rounded-lg hover:bg-white/20 transition-all">
+                    Set Gate B/P2
+                  </button>
+                  <button onClick={() => updateZoneMapper(zone.id, 'Gate C', 'P3')} className="px-3 py-1.5 text-xs bg-white/10 text-purple-100 rounded-lg hover:bg-white/20 transition-all">
+                    Set Gate C/P3
+                  </button>
+                  <button onClick={() => simulateHeatmap(zone.id, 25)} className="px-3 py-1.5 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+                    Simulate +25
+                  </button>
                 </div>
               </div>
             ))}
@@ -1269,41 +1830,55 @@ function SeatGrid({
   seats: Seat[];
   selectedSeats: string[];
 }) {
+  const availableCount = useMemo(() => seats.filter((seat) => seat.status === 'available').length, [seats]);
+  const bookedCount = useMemo(() => seats.filter((seat) => seat.status === 'booked').length, [seats]);
+  
   return (
-    <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-5">
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="bg-white/5 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">Select your seats</h3>
-          <p className="mt-1 text-sm text-slate-300">Tap to select. Locked/booked seats are unavailable.</p>
+          <h3 className="font-semibold text-white">Select Your Seats</h3>
+          <p className="text-sm text-purple-300">{availableCount} available • {bookedCount} booked</p>
         </div>
-        <span className="w-fit rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300">
-          Seat locking via Redis TTL
-        </span>
+        <div className="text-xs text-purple-300 bg-white/10 px-3 py-1 rounded-full">
+          {activeHold ? 'Hold Active' : 'Select seats to lock'}
+        </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-5 xl:grid-cols-6">
         {seats.map((seat) => {
-          const disabled = seat.status === 'booked' || (seat.status === 'locked' && !selectedSeats.includes(seat.id));
+          const isSelected = selectedSeats.includes(seat.id);
+          const isBooked = seat.status === 'booked';
+          const isLocked = seat.status === 'locked' && !isSelected;
+          const isDisabled = isBooked || isLocked || !!activeHold;
+          
+          let bgColor = 'bg-white/5 hover:bg-white/10';
+          let borderColor = 'border-white/10';
+          let textColor = 'text-white';
+          
+          if (isSelected) {
+            bgColor = 'bg-gradient-to-r from-purple-500 to-pink-500';
+            borderColor = 'border-purple-400';
+            textColor = 'text-white';
+          } else if (isBooked) {
+            bgColor = 'bg-red-500/20';
+            borderColor = 'border-red-500/30';
+            textColor = 'text-red-300';
+          } else if (isLocked) {
+            bgColor = 'bg-yellow-500/20';
+            borderColor = 'border-yellow-500/30';
+            textColor = 'text-yellow-300';
+          }
+          
           return (
             <button
               key={seat.id}
               onClick={() => onToggle(seat.id)}
-              disabled={disabled || Boolean(activeHold)}
-              className={`rounded-2xl border px-3 py-4 text-left transition focus:outline-none focus:ring-2 focus:ring-sky-300/40 ${
-                selectedSeats.includes(seat.id)
-                  ? 'border-sky-300 bg-sky-400/20'
-                  : seat.status === 'booked'
-                    ? 'border-white/5 bg-white/5 text-slate-500'
-                    : seat.status === 'locked'
-                      ? 'border-amber-300/30 bg-amber-500/10 text-amber-100'
-                      : 'border-white/10 bg-white/5 hover:border-sky-300/40 hover:bg-white/10'
-              }`}
+              disabled={isDisabled}
+              className={`p-3 rounded-xl border ${borderColor} ${bgColor} transition-all text-left ${!isDisabled && !isSelected ? 'hover:scale-105' : ''} disabled:cursor-not-allowed`}
             >
-              <p className="text-xs text-slate-300">
-                Row {seat.row} • Seat {seat.number}
-              </p>
-              <p className="mt-2 text-sm font-semibold text-white">{seat.sectionId}-{seat.row}{seat.number}</p>
-              <p className="mt-1 text-xs text-slate-400">₹{seat.price}</p>
+              <div className="text-xs font-mono">{seat.row}{seat.number}</div>
+              <div className="text-xs mt-1">₹{seat.price}</div>
             </button>
           );
         })}
@@ -1312,89 +1887,103 @@ function SeatGrid({
   );
 }
 
-function Modal({
-  children,
-  onClose,
-  title,
-}: {
-  children: ReactElement;
-  onClose: () => void;
-  title: string;
-}) {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4 backdrop-blur" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/80 shadow-glow">
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
-          >
-            Close
-          </button>
-        </div>
-        <div className="px-6 py-5">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 function HeatmapPanel({ zones, guidance }: { zones: Zone[]; guidance: Guidance | null }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Crowd density heatmap</h3>
-        <MapPin size={18} />
+    <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-white">Live Crowd Density</h3>
+        <Activity className="text-purple-300" size={20} />
       </div>
-      <div className="mt-4 grid gap-3">
-        {zones.map((zone) => (
-          <div key={zone.id} className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-semibold text-white">{zone.name}</p>
-                <p className="text-sm text-slate-400">{zone.type} • {zone.gate} • {zone.parkingZone}</p>
+      
+      <div className="space-y-4">
+        {zones.map((zone) => {
+          const densityClass = zone.score > 0.7 ? 'from-red-500 to-orange-500' : 
+                               zone.score > 0.4 ? 'from-yellow-500 to-orange-500' : 
+                               'from-green-500 to-emerald-500';
+          const densityText = zone.score > 0.7 ? 'High' : zone.score > 0.4 ? 'Medium' : 'Low';
+          
+          return (
+            <div key={zone.id} className="bg-white/5 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h4 className="font-semibold text-white">{zone.name}</h4>
+                  <p className="text-xs text-purple-300">{zone.type}</p>
+                </div>
+                <div className="text-right">
+                  <div className={`text-sm font-semibold ${
+                    zone.score > 0.7 ? 'text-red-300' : zone.score > 0.4 ? 'text-yellow-300' : 'text-green-300'
+                  }`}>
+                    {densityText} Density
+                  </div>
+                  <div className="text-xs text-purple-300">{zone.waitTime} min wait</div>
+                </div>
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${zone.score > 0.8 ? 'bg-rose-500/20 text-rose-200' : zone.score > 0.6 ? 'bg-amber-500/20 text-amber-100' : 'bg-emerald-500/20 text-emerald-100'}`}>
-                {Math.round(zone.score * 100)}%
-              </span>
+              
+              <div className="mb-2">
+                <div className="flex justify-between text-xs text-purple-300 mb-1">
+                  <span>Occupancy</span>
+                  <span>{zone.occupancy}/{zone.capacity}</span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full bg-gradient-to-r ${densityClass} rounded-full transition-all duration-500`}
+                    style={{ width: `${(zone.occupancy / zone.capacity) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <MapPin size={12} className="text-purple-300" />
+                  <span className="text-purple-300">{zone.gate || 'Gate not set'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Car size={12} className="text-purple-300" />
+                  <span className="text-purple-300">{zone.parkingZone || 'Parking not set'}</span>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-white/5">
-              <div className={`h-2 rounded-full ${zone.score > 0.8 ? 'bg-rose-400' : zone.score > 0.6 ? 'bg-amber-400' : 'bg-emerald-400'}`} style={{ width: `${Math.min(zone.score * 100, 100)}%` }} />
-            </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-slate-300">
-              <span>{zone.occupancy}/{zone.capacity} people</span>
-              <span>{zone.waitTime} min wait</span>
+          );
+        })}
+      </div>
+      
+      {guidance && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
+          <div className="flex items-start gap-3">
+            <Sparkles className="text-purple-300 mt-0.5" size={16} />
+            <div>
+              <p className="text-sm font-semibold text-white">Smart Recommendation</p>
+              <p className="text-xs text-purple-200">{guidance.message}</p>
             </div>
           </div>
-        ))}
-      </div>
-      {guidance ? <div className="mt-4 rounded-[22px] border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-50">{guidance.message}</div> : null}
+        </div>
+      )}
     </div>
   );
 }
 
 function NotificationsPanel({ notifications }: { notifications: Notification[] }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-      <div className="flex items-center gap-3">
-        <Bell size={18} />
-        <h3 className="text-lg font-semibold text-white">Notifications</h3>
+    <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <Bell className="text-purple-300" size={20} />
+        <h3 className="text-xl font-bold text-white">Notifications</h3>
       </div>
-      <div className="mt-4 space-y-3">
-        {notifications.length ? notifications.map((item) => (
-          <div key={item.id} className="rounded-[22px] border border-white/10 bg-slate-950/50 p-4">
-            <p className="font-medium text-white">{item.message}</p>
-            <p className="mt-2 text-xs text-slate-400">{new Date(item.createdAt).toLocaleString()}</p>
+      
+      <div className="space-y-3 max-h-[300px] overflow-y-auto">
+        {notifications.length > 0 ? (
+          notifications.map((item) => (
+            <div key={item.id} className="bg-white/5 rounded-xl p-3">
+              <p className="text-sm text-white">{item.message}</p>
+              <p className="text-xs text-purple-300 mt-1">{new Date(item.createdAt).toLocaleString()}</p>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <Bell size={32} className="text-purple-300/50 mx-auto mb-2" />
+            <p className="text-purple-200 text-sm">No new notifications</p>
           </div>
-        )) : <p className="text-sm text-slate-300">No notifications yet.</p>}
+        )}
       </div>
     </div>
   );
@@ -1403,55 +1992,60 @@ function NotificationsPanel({ notifications }: { notifications: Notification[] }
 function LatestBookingCard({ booking }: { booking: Booking | null }) {
   if (!booking) {
     return (
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-        <div className="flex items-center gap-3"><Ticket size={18} /><h3 className="text-lg font-semibold text-white">Latest booking</h3></div>
-        <p className="mt-4 text-sm text-slate-300">No confirmed booking yet. Lock seats and complete checkout in the venue map.</p>
+      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Ticket className="text-purple-300" size={20} />
+          <h3 className="text-xl font-bold text-white">Latest Booking</h3>
+        </div>
+        <div className="text-center py-6">
+          <p className="text-purple-200 text-sm">No active bookings</p>
+          <Link to="/venue-map" className="inline-block mt-3 text-sm text-purple-300 hover:text-purple-100 transition">
+            Book your first seats →
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-      <div className="flex items-center gap-3"><CheckCircle2 size={18} /><h3 className="text-lg font-semibold text-white">Latest booking</h3></div>
-      <div className="mt-4 grid gap-3">
-        <BookingMeta icon={Armchair} label="Seats" value={booking.seatIds.join(', ')} />
-        <BookingMeta icon={MapPin} label="Gate" value={booking.gate} />
-        <BookingMeta icon={Car} label="Parking" value={booking.parkingZone} />
-        <BookingMeta icon={Clock3} label="Status" value={booking.status} />
+    <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <CheckCircle2 className="text-green-400" size={20} />
+        <h3 className="text-xl font-bold text-white">Latest Booking</h3>
       </div>
-    </div>
-  );
-}
-
-function BookingMeta({ icon: Icon, label, value }: { icon: typeof Ticket; label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-[22px] border border-white/10 bg-slate-950/50 px-4 py-3">
-      <div className="flex items-center gap-3">
-        <div className="rounded-2xl bg-white/5 p-2"><Icon size={16} /></div>
-        <span className="text-sm text-slate-300">{label}</span>
+      
+      <div className="space-y-3">
+        <div className="flex justify-between items-center py-2 border-b border-white/10">
+          <span className="text-purple-300">Seats</span>
+          <span className="text-white font-semibold">{booking.seatIds.join(', ')}</span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-white/10">
+          <span className="text-purple-300">Gate</span>
+          <span className="text-white">{booking.gate}</span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-white/10">
+          <span className="text-purple-300">Parking</span>
+          <span className="text-white">{booking.parkingZone}</span>
+        </div>
+        <div className="flex justify-between items-center py-2">
+          <span className="text-purple-300">Amount</span>
+          <span className="text-white font-bold">₹{booking.amount}</span>
+        </div>
       </div>
-      <span className="font-semibold text-white">{value}</span>
-    </div>
-  );
-}
-
-function StatCard({ caption, icon: Icon, title, value }: { caption: string; icon: typeof Ticket; title: string; value: string }) {
-  return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-300">{title}</p>
-        <div className="rounded-2xl bg-white/5 p-3"><Icon size={18} /></div>
-      </div>
-      <p className="mt-4 text-3xl font-semibold text-white">{value}</p>
-      <p className="mt-2 text-sm text-slate-400">{caption}</p>
     </div>
   );
 }
 
 function LoadingPanel({ className = '', label }: { className?: string; label: string }) {
   return (
-    <div className={`grid min-h-[320px] w-full place-items-center rounded-[28px] border border-white/10 bg-white/5 text-slate-200 ${className}`}>
-      {label}
+    <div className={`flex flex-col items-center justify-center min-h-[400px] ${className}`}>
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Waves className="text-purple-400" size={24} />
+        </div>
+      </div>
+      <p className="mt-4 text-purple-200">{label}</p>
     </div>
   );
 }
