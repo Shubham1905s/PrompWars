@@ -30,6 +30,46 @@ admin.initializeApp({
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'venueflow-dev-secret';
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+
+// reCAPTCHA verification function
+async function verifyRecaptchaToken(token, action) {
+  if (!RECAPTCHA_SECRET_KEY) {
+    console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
+    return { success: true, score: 0.5 };
+  }
+
+  try {
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${RECAPTCHA_SECRET_KEY}&response=${token}`,
+    });
+
+    const data = await response.json();
+    console.log(`reCAPTCHA verification for ${action}:`, data);
+
+    if (!data.success) {
+      return { success: false, score: 0, reason: 'reCAPTCHA verification failed' };
+    }
+
+    // Check action matches
+    if (data.action !== action) {
+      return { success: false, score: data.score, reason: `Action mismatch: expected ${action}, got ${data.action}` };
+    }
+
+    // Check score (0.0 is likely a bot, 1.0 is likely human)
+    const threshold = 0.5;
+    if (data.score < threshold) {
+      return { success: false, score: data.score, reason: `Score too low: ${data.score}` };
+    }
+
+    return { success: true, score: data.score };
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return { success: false, reason: 'Verification error' };
+  }
+}
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
@@ -276,6 +316,23 @@ export async function createPlatformServer({ disableIntervals = false } = {}) {
         .catch(() => res.json({ user: null }));
     }
     return res.json({ user: user ? pickUser(user) : null });
+  });
+
+  app.post('/api/auth/verify-recaptcha', auth(), async (req, res) => {
+    const recaptchaToken = req.headers['x-recaptcha-token'];
+    const { action } = req.body;
+
+    if (!recaptchaToken) {
+      return res.status(400).json({ message: 'Missing reCAPTCHA token' });
+    }
+
+    const result = await verifyRecaptchaToken(recaptchaToken, action);
+    if (!result.success) {
+      console.warn(`reCAPTCHA verification failed for user ${req.user.id}: ${result.reason}`);
+      return res.status(403).json({ message: 'reCAPTCHA verification failed', reason: result.reason });
+    }
+
+    res.json({ success: true, score: result.score });
   });
 
   app.get('/api/bootstrap', auth(), (req, res) => {

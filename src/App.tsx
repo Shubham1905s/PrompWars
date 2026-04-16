@@ -84,8 +84,32 @@ const defaultOrigin = import.meta.env.VITE_API_URL
 
 const API_URL = import.meta.env.VITE_API_URL ?? `${defaultOrigin}/api`;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? defaultOrigin;
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+// Helper function to get reCAPTCHA Enterprise token
+async function getRecaptchaToken(action: string = 'LOGIN'): Promise<string> {
+  if (!RECAPTCHA_SITE_KEY) {
+    console.error('reCAPTCHA site key not configured in environment');
+    throw new Error('reCAPTCHA site key not configured');
+  }
+
+  if (typeof window === 'undefined' || !(window as any).grecaptcha?.enterprise) {
+    console.error('grecaptcha.enterprise not loaded. Check reCAPTCHA script in index.html');
+    throw new Error('reCAPTCHA script not loaded');
+  }
+
+  try {
+    console.log(`Executing reCAPTCHA for action: ${action}`);
+    const token = await (window as any).grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action });
+    console.log(`✓ reCAPTCHA token generated for action: ${action}`);
+    return token;
+  } catch (error) {
+    console.error('reCAPTCHA execution error:', error);
+    throw error;
+  }
+}
+
+async function request<T>(path: string, init?: RequestInit, recaptchaToken?: string): Promise<T> {
   const controller = new AbortController();
   const timeoutMs = 10000;
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -98,6 +122,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: {
       'Content-Type': 'application/json',
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(recaptchaToken ? { 'X-Recaptcha-Token': recaptchaToken } : {}),
       ...(init?.headers ?? {}),
     },
   });
@@ -253,7 +278,32 @@ function App() {
 
   const login = async (payload: AuthPayload) => {
     try {
+      // Get reCAPTCHA token (non-blocking if it fails)
+      let recaptchaToken = '';
+      try {
+        recaptchaToken = await getRecaptchaToken('LOGIN');
+        console.log('✓ reCAPTCHA token obtained for login');
+      } catch (captchaError) {
+        console.warn('reCAPTCHA token generation failed:', captchaError);
+        // Continue without verification
+      }
+
       await signInWithEmailAndPassword(auth, payload.email, payload.password);
+      
+      // Verify reCAPTCHA on backend (non-blocking)
+      if (recaptchaToken) {
+        try {
+          await request('/auth/verify-recaptcha', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'LOGIN' }),
+          }, recaptchaToken);
+          console.log('✓ reCAPTCHA verified on backend');
+        } catch (verifyError) {
+          console.warn('reCAPTCHA backend verification failed:', verifyError);
+          // Don't block login on verification failure
+        }
+      }
+      
       navigate(roleHome(user?.role || 'user'));
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
@@ -262,9 +312,34 @@ function App() {
 
   const register = async (payload: AuthPayload) => {
     try {
+      // Get reCAPTCHA token (non-blocking if it fails)
+      let recaptchaToken = '';
+      try {
+        recaptchaToken = await getRecaptchaToken('REGISTER');
+        console.log('✓ reCAPTCHA token obtained for register');
+      } catch (captchaError) {
+        console.warn('reCAPTCHA token generation failed:', captchaError);
+        // Continue without verification
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
       // Update display name
       await updateProfile(userCredential.user, { displayName: payload.name });
+      
+      // Verify reCAPTCHA on backend (non-blocking)
+      if (recaptchaToken) {
+        try {
+          await request('/auth/verify-recaptcha', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'REGISTER' }),
+          }, recaptchaToken);
+          console.log('✓ reCAPTCHA verified on backend');
+        } catch (verifyError) {
+          console.warn('reCAPTCHA backend verification failed:', verifyError);
+          // Don't block registration on verification failure
+        }
+      }
+      
       navigate(roleHome(user?.role || 'user'));
     } catch (error: any) {
       throw new Error(error.message || 'Registration failed');
