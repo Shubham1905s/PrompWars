@@ -74,8 +74,10 @@ async function verifyRecaptchaToken(token, action) {
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (origin === CLIENT_ORIGIN) return true;
+  if (origin.includes("vercel.app")) return true; 
   if (origin.startsWith('http://localhost:')) return true;
   if (origin.startsWith('http://127.0.0.1:')) return true;
+  if (origin.startsWith('https://prompwars.onrender.com:')) return true;
   return false;
 }
 
