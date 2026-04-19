@@ -60,10 +60,10 @@ export function createSeedState() {
       score: Number((zone.occupancy / zone.capacity).toFixed(2)),
     })),
     menu: [
-      { id: 'burger', name: 'Stadium Burger', price: 280, prepTime: 10, category: 'Meals' },
-      { id: 'fries', name: 'Loaded Fries', price: 180, prepTime: 8, category: 'Snacks' },
-      { id: 'cola', name: 'Large Cola', price: 120, prepTime: 3, category: 'Drinks' },
-      { id: 'nachos', name: 'Cheese Nachos', price: 220, prepTime: 6, category: 'Snacks' },
+      { id: 'burger', name: 'Stadium Burger', price: 280, prepTime: 10, category: 'Meals', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800' },
+      { id: 'fries', name: 'Loaded Fries', price: 180, prepTime: 8, category: 'Snacks', image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=800' },
+      { id: 'cola', name: 'Large Cola', price: 120, prepTime: 3, category: 'Drinks', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?q=80&w=800' },
+      { id: 'nachos', name: 'Cheese Nachos', price: 220, prepTime: 6, category: 'Snacks', image: 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?q=80&w=800' },
     ],
   };
 }

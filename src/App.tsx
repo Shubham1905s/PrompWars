@@ -66,7 +66,7 @@ type Seat = { eventId: string; gate: string; holdExpiresAt?: string | null; id: 
 type Zone = { capacity: number; congestion?: string; gate: string; id: string; name: string; occupancy: number; parkingZone: string; score: number; type: string; waitTime: number };
 type Booking = { amount: number; createdAt: string; eventId: string; gate: string; id: string; parkingZone: string; seatIds: string[]; status: string };
 type Order = { bookingId: string; createdAt: string; id: string; items: { itemId: string; quantity: number }[]; seatId: string; status: string; total: number; userId: string };
-type MenuItem = { category: string; id: string; name: string; prepTime: number; price: number };
+type MenuItem = { category: string; id: string; name: string; prepTime: number; price: number; image: string };
 type Notification = { createdAt: string; id: string; message: string; type: string };
 type Guidance = { message: string; recommendedGate: string; recommendedParking: string };
 type Hold = { createdAt: string; eventId: string; expiresAt: string; id: string; seatIds: string[]; userId: string };
@@ -289,7 +289,7 @@ function App() {
       }
 
       await signInWithEmailAndPassword(auth, payload.email, payload.password);
-      
+
       // Verify reCAPTCHA on backend (non-blocking)
       if (recaptchaToken) {
         try {
@@ -303,7 +303,7 @@ function App() {
           // Don't block login on verification failure
         }
       }
-      
+
       navigate(roleHome(user?.role || 'user'));
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
@@ -325,7 +325,7 @@ function App() {
       const userCredential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
       // Update display name
       await updateProfile(userCredential.user, { displayName: payload.name });
-      
+
       // Verify reCAPTCHA on backend (non-blocking)
       if (recaptchaToken) {
         try {
@@ -339,7 +339,7 @@ function App() {
           // Don't block registration on verification failure
         }
       }
-      
+
       navigate(roleHome(user?.role || 'user'));
     } catch (error: any) {
       throw new Error(error.message || 'Registration failed');
@@ -884,8 +884,8 @@ function PlatformLayout({
                       key={item.href}
                       to={item.href}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${isActive
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                          : 'text-purple-100 hover:bg-white/10'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'text-purple-100 hover:bg-white/10'
                         }`}
                     >
                       <Icon size={16} />
@@ -932,8 +932,8 @@ function PlatformLayout({
                       to={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                          : 'text-purple-100 hover:bg-white/10'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                        : 'text-purple-100 hover:bg-white/10'
                         }`}
                     >
                       <Icon size={18} />
@@ -1083,8 +1083,8 @@ function EventsPage({ bootstrap }: { bootstrap: BootstrapPayload | null }) {
                 key={sport}
                 onClick={() => setActiveSport(sport)}
                 className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${activeSport === sport
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'bg-white/10 text-purple-100 hover:bg-white/20'
                   }`}
               >
                 {sport}
@@ -1254,8 +1254,8 @@ function VenueMapPage({
                       key={section}
                       onClick={() => setSelectedSection(section)}
                       className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${selectedSection === section
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'bg-white/10 text-purple-100 hover:bg-white/20'
                         }`}
                     >
                       {section}
@@ -1457,22 +1457,23 @@ function OrderFoodPage({
   const [cart, setCart] = useState<CartItem>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const navigate = useNavigate();
-
-  if (!bootstrap) return <LoadingPanel label="Loading menu..." />;
+  const menu = bootstrap?.menu ?? [];
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(bootstrap.menu.map(item => item.category)));
+    const cats = Array.from(new Set(menu.map((item) => item.category)));
     return ['All', ...cats];
-  }, [bootstrap.menu]);
+  }, [menu]);
 
   const filteredMenu = useMemo(() => {
-    if (selectedCategory === 'All') return bootstrap.menu;
-    return bootstrap.menu.filter(item => item.category === selectedCategory);
-  }, [selectedCategory, bootstrap.menu]);
+    if (selectedCategory === 'All') return menu;
+    return menu.filter((item) => item.category === selectedCategory);
+  }, [menu, selectedCategory]);
 
   const cartTotal = useMemo(() => {
-    return bootstrap.menu.reduce((sum, item) => sum + (item.price * (cart[item.id] || 0)), 0);
-  }, [cart, bootstrap.menu]);
+    return menu.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
+  }, [cart, menu]);
+
+  if (!bootstrap) return <LoadingPanel label="Loading menu..." />;
 
   const handlePlaceOrder = async () => {
     if (!latestBooking) {
@@ -1506,8 +1507,8 @@ function OrderFoodPage({
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${selectedCategory === category
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                  : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-white/10 text-purple-100 hover:bg-white/20'
                 }`}
             >
               {category}
@@ -1516,37 +1517,47 @@ function OrderFoodPage({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {filteredMenu.map((item) => (
-            <div key={item.id} className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-white">{item.name}</h3>
-                  <p className="text-xs text-purple-300">Prep: {item.prepTime} min</p>
+          {filteredMenu.length > 0 ? (
+            filteredMenu.map((item) => (
+              <div key={item.id} className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition-all">
+                <div className="h-32 bg-cover bg-center" style={{ backgroundImage: `url('${item.image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800'}')` }} />
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-white">{item.name}</h3>
+                      <p className="text-xs text-purple-300">Prep: {item.prepTime} min</p>
+                    </div>
+                    <div className="text-lg font-bold text-white">₹{item.price}</div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-purple-200">{item.category}</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setCart((prev) => ({ ...prev, [item.id]: Math.max((prev[item.id] || 0) - 1, 0) }))}
+                        className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
+                        disabled={!latestBooking}
+                      >
+                        -
+                      </button>
+                      <span className="text-white font-semibold min-w-[20px] text-center">{cart[item.id] || 0}</span>
+                      <button
+                        onClick={() => setCart((prev) => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                        className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
+                        disabled={!latestBooking}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-lg font-bold text-white">₹{item.price}</div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-purple-200">{item.category}</span>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setCart(prev => ({ ...prev, [item.id]: Math.max((prev[item.id] || 0) - 1, 0) }))}
-                    className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
-                    disabled={!latestBooking}
-                  >
-                    -
-                  </button>
-                  <span className="text-white font-semibold min-w-[20px] text-center">{cart[item.id] || 0}</span>
-                  <button
-                    onClick={() => setCart(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
-                    className="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
-                    disabled={!latestBooking}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+            ))
+          ) : (
+            <div className="md:col-span-2 rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
+              <p className="text-lg font-semibold text-white">No menu items available right now.</p>
+              <p className="mt-2 text-sm text-purple-200">Please refresh in a moment or check back after the vendor menu is updated.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -1558,7 +1569,7 @@ function OrderFoodPage({
           </div>
 
           <div className="space-y-3 max-h-[400px] overflow-y-auto mb-4">
-            {bootstrap.menu.filter(item => (cart[item.id] || 0) > 0).map((item) => (
+            {menu.filter((item) => (cart[item.id] || 0) > 0).map((item) => (
               <div key={item.id} className="flex justify-between items-center py-2 border-b border-white/10">
                 <div>
                   <p className="text-white font-medium">{item.name}</p>
@@ -1621,8 +1632,8 @@ function MyOrdersPage({ bootstrap, latestBooking }: { bootstrap: BootstrapPayloa
                     <h3 className="font-semibold text-white">Seat {order.seatId}</h3>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.status === 'delivered' ? 'bg-green-500/20 text-green-300' :
-                      order.status === 'preparing' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-purple-500/20 text-purple-300'
+                    order.status === 'preparing' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-purple-500/20 text-purple-300'
                     }`}>
                     {order.status}
                   </span>
@@ -1705,8 +1716,8 @@ function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User
                 key={status}
                 onClick={() => setFilter(status)}
                 className={`px-4 py-2 rounded-xl capitalize transition-all ${filter === status
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                    : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                  : 'bg-white/10 text-purple-100 hover:bg-white/20'
                   }`}
               >
                 {status}
@@ -1735,8 +1746,8 @@ function VendorDashboardPage({ firebaseUser, updateOrder }: { firebaseUser: User
                       key={status}
                       onClick={() => updateOrder(order.id, status)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${order.status === status
-                          ? 'bg-purple-500 text-white'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-white/10 text-purple-100 hover:bg-white/20'
                         }`}
                     >
                       {status}
